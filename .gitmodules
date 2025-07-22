@@ -18,3 +18,6 @@
 	path = godot-cpp
 	url = https://github.com/godotengine/godot-cpp
 	branch = 4.4
+[submodule "addons/squirrel_away"]
+	path = addons/squirrel_away
+	url = https://github.com/SnoringCatGames/squirrel_away2
