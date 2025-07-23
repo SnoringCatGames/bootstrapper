@@ -42,6 +42,10 @@ https://docs.godotengine.org/en/stable/tutorials/scripting/gdextension/gdextensi
 
 FIXME: LEFT OFF HERE: ---------------------------------------------------
 
+ERROR: is not available within this folder, as Git submodules haven't been initialized. Run the following command to download 
+
+Figure out not needing nested submodules.
+
 - Test DLLs with Surfacer.
 
 - REVISIT MY RECURSIVE SUBMODULE PLAN:
