@@ -2,24 +2,29 @@
 import os
 import sys
 
-from scaffolder.build_utils import set_up_scaffolder
-from snore_core.methods import print_error
-from snore_core.build_utils import post_setup, pre_setup, set_up_snore_core
-from squirrel_away.build_utils import set_up_squirrel_away
-from surfacer.build_utils import set_up_surfacer
+from snore_core.build_utils import \
+    post_setup as post_setup_snore_core, \
+    pre_setup as pre_setup_snore_core, \
+    set_up as set_up_snore_core
+from scaffolder.build_utils import set_up as set_up_scaffolder
+from surfacer.build_utils import set_up as set_up_surfacer
 
 
-libname = "Surfacer"
-projectdir = "demo"
+lib_name = "Bootstrapper"
+addon_dir_name = "bootstrapper"
 
-env = pre_setup()
+env = pre_setup_snore_core(ARGUMENTS, Environment, Variables, Help, SConscript)
 
-cpppaths = []
+cpp_paths = []
 sources = []
 
-set_up_snore_core(env, cpppaths, sources)
-set_up_scaffolder(env, cpppaths, sources)
-set_up_surfacer(env, cpppaths, sources)
-set_up_squirrel_away(env, cpppaths, sources)
+set_up_snore_core(env, cpp_paths, sources, addon_dir_name, is_setup_for_self=False)
+set_up_scaffolder(env, cpp_paths, sources, addon_dir_name, is_setup_for_self=False)
+set_up_surfacer(env, cpp_paths, sources, addon_dir_name, is_setup_for_self=False)
 
-post_setup(env, cpppaths, sources, libname, projectdir)
+post_setup_snore_core(env, cpp_paths, sources, lib_name, addon_dir_name, Default)
+
+# Make the SnoreCore GDExtension and GDScript addon files accessible from the Bootstrapper demo.
+os.symlink("snore_core/demo/addons/snore_core", "demo/addons/snore_core", target_is_directory=True)
+os.symlink("scaffolder/demo/addons/scaffolder", "demo/addons/scaffolder", target_is_directory=True)
+os.symlink("surfacer/demo/addons/surfacer", "demo/addons/surfacer", target_is_directory=True)
