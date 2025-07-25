@@ -7,6 +7,12 @@
 [submodule "surfacer"]
 	path = submodules/surfacer
 	url = https://github.com/SnoringCatGames/surfacer2
+[submodule "submodules/surf_scaf"]
+	path = submodules/surf_scaf
+	url = https://github.com/SnoringCatGames/surf_scaf
+[submodule "squirrel_away"]
+	path = submodules/squirrel_away
+	url = https://github.com/SnoringCatGames/squirrel_away2
 [submodule "googletest"]
 	path = submodules/googletest
 	url = https://github.com/google/googletest.git
@@ -18,9 +24,3 @@
 	path = submodules/godot-cpp
 	url = https://github.com/godotengine/godot-cpp
 	branch = 4.4
-[submodule "squirrel_away"]
-	path = submodules/squirrel_away
-	url = https://github.com/SnoringCatGames/squirrel_away2
-[submodule "submodules/surf_scaf"]
-	path = submodules/surf_scaf
-	url = https://github.com/SnoringCatGames/surf_scaf

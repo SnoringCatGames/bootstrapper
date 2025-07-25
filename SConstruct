@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import os
 import sys
 
 from submodules.snore_core.build_utils import (
@@ -8,6 +9,7 @@ from submodules.snore_core.build_utils import (
     post_setup as post_setup_snore_core,
     pre_setup as pre_setup_snore_core,
     set_up as set_up_snore_core,
+    print_warning,
 )
 from submodules.scaffolder.build_utils import (
     default_addon_dir_name as scaffolder_addon_dir_name,
@@ -20,11 +22,14 @@ from submodules.surfacer.build_utils import (
 from submodules.surf_scaf.build_utils import (
     default_addon_dir_name as surf_scaf_addon_dir_name,
     default_lib_name as surf_scaf_lib_name,
+    set_up as set_up_surf_scaf,
 )
 from submodules.squirrel_away.build_utils import (
     default_addon_dir_name as squirrel_away_addon_dir_name,
 )
-
+from build_utils import (
+    create_symlink_for_surf_scaf_extension_manifest,
+)
 
 env = pre_setup_snore_core(ARGUMENTS, Environment, Variables, Help, SConscript)
 
@@ -56,6 +61,22 @@ set_up_surfacer(
     surfacer_addon_dir_name,
     is_setup_for_self=False,
 )
+print_warning(
+    ">>>>>>>>>>>>>>>>>>>>> 1"
+    + str(os.path.exists(os.path.abspath("demo/addons/surf_scaf/bin/windows")))
+)
+set_up_surf_scaf(
+    env,
+    cpp_paths,
+    sources,
+    surf_scaf_addon_dir_name,
+    is_setup_for_self=False,
+)
+
+print_warning(
+    ">>>>>>>>>>>>>>>>>>>>> 2"
+    + str(os.path.exists(os.path.abspath("demo/addons/surf_scaf/bin/windows")))
+)
 
 post_setup_snore_core(
     env,
@@ -63,7 +84,13 @@ post_setup_snore_core(
     sources,
     surf_scaf_lib_name,
     surf_scaf_addon_dir_name,
+    False,
     Default,
+)
+
+print_warning(
+    ">>>>>>>>>>>>>>>>>>>>> 3"
+    + str(os.path.exists(os.path.abspath("demo/addons/surf_scaf/bin/windows")))
 )
 
 create_submodule_addons_symlinks(snore_core_addon_dir_name, False)
@@ -71,3 +98,10 @@ create_submodule_addons_symlinks(scaffolder_addon_dir_name, False)
 create_submodule_addons_symlinks(surfacer_addon_dir_name, False)
 create_submodule_addons_symlinks(surf_scaf_addon_dir_name, False)
 create_submodule_addons_symlinks(squirrel_away_addon_dir_name, False)
+
+create_symlink_for_surf_scaf_extension_manifest()
+
+print_warning(
+    ">>>>>>>>>>>>>>>>>>>>> 4"
+    + str(os.path.exists(os.path.abspath("demo/addons/surf_scaf/bin/windows")))
+)
