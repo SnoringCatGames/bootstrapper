@@ -42,9 +42,6 @@ https://docs.godotengine.org/en/stable/tutorials/scripting/gdextension/gdextensi
 
 FIXME: LEFT OFF HERE: ---------------------------------------------------
 
-- Create dev branches.
-  - Make sure main only has the README and LICENSE.
-
 - Get Scaffolder passing tests.
 
 - Make sure each repo's Actions are set up and working.
@@ -138,6 +135,10 @@ FIXME: LEFT OFF HERE: ---------------------------------------------------
       - If support is added later, we should update these modules to depend on each other via dynamically-linked shared libraries.
 	    - See https://github.com/godot-rust/gdext/issues/615.
   - Mention that you don't need to keep nested submodules in-sync.
+
+- VSCode: Source Control tab > Submodule header > Right click > Close Repository
+  - Ctrl+Shift+P: "Git: Reopen closed repositories..."
+  - To re-display a closed repository: Right click in the empty space of the Source Control panel > Repositories > <Your repository>
 
 
 - Create some extra build task and launch rules for Bootstrapper:
