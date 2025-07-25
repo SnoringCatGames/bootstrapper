@@ -42,21 +42,9 @@ https://docs.godotengine.org/en/stable/tutorials/scripting/gdextension/gdextensi
 
 FIXME: LEFT OFF HERE: ---------------------------------------------------
 
-- Get Scaffolder passing tests.
+- NOW, ONLY WORK FROM BOOTSTRAPPER2!
 
-- Make sure each repo's Actions are set up and working.
-  - Only trigger tests for changes to main.
-
-- Create SurfScaf.
-
-- Finish creating squirrel_away and bootstrapper2.
-  - Probably just start over from scratch at this point?
-
-- Make sure submodule recursiveness is working OK with VSCode.
-
-- NOW, ONLY WORK FROM BOOOSTRAPPER2!
-
-
+- Port Scaffolder to C++.
 
 
 
