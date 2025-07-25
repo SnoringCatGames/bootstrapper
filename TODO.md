@@ -42,17 +42,28 @@ https://docs.godotengine.org/en/stable/tutorials/scripting/gdextension/gdextensi
 
 FIXME: LEFT OFF HERE: ---------------------------------------------------
 
-ERROR: is not available within this folder, as Git submodules haven't been initialized. Run the following command to download 
+- Create dev branches.
+  - Make sure main only has the README and LICENSE.
 
-Figure out not needing nested submodules.
+- Get Scaffolder passing tests.
 
-- Test DLLs with Surfacer.
+- Make sure each repo's Actions are set up and working.
+  - Only trigger tests for changes to main.
 
-- REVISIT MY RECURSIVE SUBMODULE PLAN:
-  - Is the current design going to be ok if nested submodules don't get synced??
-  - Try to make it so...
+- Create SurfScaf.
 
-- Finish re-structuring the other repos.
+- Finish creating squirrel_away and bootstrapper2.
+  - Probably just start over from scratch at this point?
+
+- Make sure submodule recursiveness is working OK with VSCode.
+
+- NOW, ONLY WORK FROM BOOOSTRAPPER2!
+
+
+
+
+
+
 
 - Move each repo to a dev branch.
   - Clear out the main branch.
@@ -62,36 +73,23 @@ Figure out not needing nested submodules.
     - It'll need to also generate a new Release.
   - Document the various Actions, when the trigger, and how they work.
 
-- Figure out DDLs and moving SnoreCore, Scaffolder, and Surfacer into three separate repos.
-  - Also create SquirrelAway2.
-  - Then, also create Bootstrapper as my main repo to work from, with all four others as submodules.
-  - OTHER NOTES:
-    - Split apart Scaffolder, Surfacer, and SnoreCore into separate repos
-      - Figure out build commands to make DLLs for each.
-      - Update includes and SCons logic to use these DLLs.
-      - Add GitHub Actions workflows to automatically build these DLLs for each push.
-      - Figure out how nested submodules will work...
-      - Also, figure out if I can mark a file/directory to be excluded from git history. I only want the latest DLL to be recorded. Or should I rather calculated the SnoreCore DLL separately for each submodule dependency for Scaffolder and Surfacer?
-      - Ah, actually, I suppose that, for Squirrel away or Bootstrapper, I don't care whether the nested submodules ever get updated, since the root repo will have all needed nested submodules as first level submodules.
-      - So the problem then is just a matter of maintaining separate build logic in each repo's SCons file.
-      - Maybe ignore the issue of rewriting history to store fewer DLL versions until I actually see it become an issue.
-      - Same thing for GDExtension exports.
-      - Maybe both of these builds should be button activated, rather than push activated.
-- Adapt gtest_main, and plan how to test logic in the build
-- Create a simple test with GoogleTest.
-  - Read the docs.
-  - All the deps should be setup in SConstruct now!
-- Figure out the best way to incorporate the GoogleTest dependencies, such that no GoogleTest file gets included when DEBUG is false.
-  - ACTUALLY, is there a TESTS precompiler variable I can check, instead of using DEBUG for this?
-- Figure out how to run this on presubmit!!
-- **** Update GitHub Actions workflows for each repo to run tests for itself.
-- **** Update bootstrapper GitHub Actions workflow to run tests for squirrel away.
+
+
+
+- Create yet another repo for defining a single GDExtension that is the combination of both Scaffolder and Surfacer (and SnoreCore).
+  - Since Godot currently doesn't support cross-GDExtension dependencies, this combination must be its own distinct GDExtension.
+  - Update Bootstrapper and SquirrelAway to use this combo extension.
+
+
+
 
 - Plan what exactly the process will look like for generating releases (calling the build workflow).
   - And also zipping these up into a single file for publishing on the asset library, for inclusion in an addons/ folder.
   - And for creating a GitHub "Releases" artifact.
   - Can there be a button for this?
   - Update the build workflow trigger condition to not include push!
+
+
 
 - DOCS:
   - Write some architecture documentation for SnoreCore.
@@ -133,15 +131,30 @@ Figure out not needing nested submodules.
     - Include my profile picture and a waving-hand emoji.
     - Mention that I have a full-time job, but I love to make improvements to these frameworks. Give me a ping or file a ticket if there's something you need!
   - Then have lower-level docs for other bits, and link to these from the root README.
+  - Describe dynamic vs static linkage.
+    - I originally implemented these modules to use DLLs.
+    - This makes the most sense, since we want to support client games using any combination of these frameworks.
+    - However, Godot doesn't currently support support dependencies between separate GDExtensions.
+      - If support is added later, we should update these modules to depend on each other via dynamically-linked shared libraries.
+	    - See https://github.com/godot-rust/gdext/issues/615.
+  - Mention that you don't need to keep nested submodules in-sync.
+
+
+- Create some extra build task and launch rules for Bootstrapper:
+  - For docs:
+    - The flow will be to define all docs within Bootstrapper first, then push them down into their respective submodules.
+    - To do that, I'll need task rules to individually build each submodule (hopefully not depending on recursive submodule syncing; OR, is this actually important, since I'll only do this at publish time, so a full recursive sync is probably ok?).
+    - Then, I loop over each submodule, and loop over each xml file in its doc_classes/ directory, and copy the corresponding content from the root module.
+  - For publishing releases:
+    - I'll need task and launch rules to build each submodule.
+    - This should also copy-over docs to each submodule.
+    - This should also trigger the creation of GitHub Releases for each submodule.
 
 
 
 
 
 
-
-
-- Create a new dev branch.
 
 - CI:
   - Checkout this example for running the test, and recording the results.
