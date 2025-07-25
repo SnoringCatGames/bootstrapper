@@ -21,3 +21,6 @@
 [submodule "squirrel_away"]
 	path = submodules/squirrel_away
 	url = https://github.com/SnoringCatGames/squirrel_away2
+[submodule "submodules/surf_scaf"]
+	path = submodules/surf_scaf
+	url = https://github.com/SnoringCatGames/surf_scaf

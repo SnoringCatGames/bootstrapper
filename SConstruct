@@ -1,52 +1,73 @@
 #!/usr/bin/env python
-import os
 import sys
 
-from snore_core.build_utils import (
+from submodules.snore_core.build_utils import (
+    add_submodule_to_zip,
+    create_submodule_addons_symlinks,
+    default_addon_dir_name as snore_core_addon_dir_name,
     post_setup as post_setup_snore_core,
     pre_setup as pre_setup_snore_core,
     set_up as set_up_snore_core,
 )
-from scaffolder.build_utils import set_up as set_up_scaffolder
-from surfacer.build_utils import set_up as set_up_surfacer
+from submodules.scaffolder.build_utils import (
+    default_addon_dir_name as scaffolder_addon_dir_name,
+    set_up as set_up_scaffolder,
+)
+from submodules.surfacer.build_utils import (
+    default_addon_dir_name as surfacer_addon_dir_name,
+    set_up as set_up_surfacer,
+)
+from submodules.surf_scaf.build_utils import (
+    default_addon_dir_name as surf_scaf_addon_dir_name,
+    default_lib_name as surf_scaf_lib_name,
+)
+from submodules.squirrel_away.build_utils import (
+    default_addon_dir_name as squirrel_away_addon_dir_name,
+)
 
-
-bootstrapper_lib_name = "Bootstrapper"
-snore_core_addon_dir_name = "snore_core"
-scaffolder_addon_dir_name = "scaffolder"
-surfacer_addon_dir_name = "surfacer"
-bootstrapper_addon_dir_name = "bootstrapper"
 
 env = pre_setup_snore_core(ARGUMENTS, Environment, Variables, Help, SConscript)
+
+if env["is_zipping"]:
+    # Not supported for this non-addon.
+    sys.exit(0)
 
 cpp_paths = []
 sources = []
 
 set_up_snore_core(
-    env, cpp_paths, sources, snore_core_addon_dir_name, is_setup_for_self=False
+    env,
+    cpp_paths,
+    sources,
+    snore_core_addon_dir_name,
+    is_setup_for_self=False,
 )
 set_up_scaffolder(
-    env, cpp_paths, sources, scaffolder_addon_dir_name, is_setup_for_self=False
+    env,
+    cpp_paths,
+    sources,
+    scaffolder_addon_dir_name,
+    is_setup_for_self=False,
 )
 set_up_surfacer(
-    env, cpp_paths, sources, surfacer_addon_dir_name, is_setup_for_self=False
+    env,
+    cpp_paths,
+    sources,
+    surfacer_addon_dir_name,
+    is_setup_for_self=False,
 )
 
 post_setup_snore_core(
-    env, cpp_paths, sources, bootstrapper_lib_name, bootstrapper_addon_dir_name, Default
+    env,
+    cpp_paths,
+    sources,
+    surf_scaf_lib_name,
+    surf_scaf_addon_dir_name,
+    Default,
 )
 
-# FIXME: Use create_symlink()
-# Make the SnoreCore, Scaffolder, and Surfacer GDExtension and GDScript addon files accessible from the Bootstrapper demo.
-snore_core_original_path = os.path.abspath("snore_core/demo/addons/snore_core")
-snore_core_link_path = os.path.abspath("demo/addons/snore_core")
-if not os.path.lexists(snore_core_link_path):
-    os.symlink(snore_core_original_path, snore_core_link_path, target_is_directory=True)
-scaffolder_original_path = os.path.abspath("scaffolder/demo/addons/scaffolder")
-scaffolder_link_path = os.path.abspath("demo/addons/scaffolder")
-if not os.path.lexists(scaffolder_link_path):
-    os.symlink(scaffolder_original_path, scaffolder_link_path, target_is_directory=True)
-surfacer_original_path = os.path.abspath("surfacer/demo/addons/surfacer")
-surfacer_link_path = os.path.abspath("demo/addons/surfacer")
-if not os.path.lexists(surfacer_link_path):
-    os.symlink(surfacer_original_path, surfacer_link_path, target_is_directory=True)
+create_submodule_addons_symlinks(snore_core_addon_dir_name, False)
+create_submodule_addons_symlinks(scaffolder_addon_dir_name, False)
+create_submodule_addons_symlinks(surfacer_addon_dir_name, False)
+create_submodule_addons_symlinks(surf_scaf_addon_dir_name, False)
+create_submodule_addons_symlinks(squirrel_away_addon_dir_name, False)
