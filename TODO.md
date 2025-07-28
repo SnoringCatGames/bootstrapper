@@ -42,8 +42,6 @@ https://docs.godotengine.org/en/stable/tutorials/scripting/gdextension/gdextensi
 
 FIXME: LEFT OFF HERE: ---------------------------------------------------
 
-- NOW, ONLY WORK FROM BOOTSTRAPPER2!
-
 - Port Scaffolder to C++.
 
 

@@ -61,21 +61,12 @@ set_up_surfacer(
     surfacer_addon_dir_name,
     is_setup_for_self=False,
 )
-print_warning(
-    ">>>>>>>>>>>>>>>>>>>>> 1"
-    + str(os.path.exists(os.path.abspath("demo/addons/surf_scaf/bin/windows")))
-)
 set_up_surf_scaf(
     env,
     cpp_paths,
     sources,
     surf_scaf_addon_dir_name,
     is_setup_for_self=False,
-)
-
-print_warning(
-    ">>>>>>>>>>>>>>>>>>>>> 2"
-    + str(os.path.exists(os.path.abspath("demo/addons/surf_scaf/bin/windows")))
 )
 
 post_setup_snore_core(
@@ -88,11 +79,6 @@ post_setup_snore_core(
     Default,
 )
 
-print_warning(
-    ">>>>>>>>>>>>>>>>>>>>> 3"
-    + str(os.path.exists(os.path.abspath("demo/addons/surf_scaf/bin/windows")))
-)
-
 create_submodule_addons_symlinks(snore_core_addon_dir_name, False)
 create_submodule_addons_symlinks(scaffolder_addon_dir_name, False)
 create_submodule_addons_symlinks(surfacer_addon_dir_name, False)
@@ -100,8 +86,3 @@ create_submodule_addons_symlinks(surf_scaf_addon_dir_name, False)
 create_submodule_addons_symlinks(squirrel_away_addon_dir_name, False)
 
 create_symlink_for_surf_scaf_extension_manifest()
-
-print_warning(
-    ">>>>>>>>>>>>>>>>>>>>> 4"
-    + str(os.path.exists(os.path.abspath("demo/addons/surf_scaf/bin/windows")))
-)

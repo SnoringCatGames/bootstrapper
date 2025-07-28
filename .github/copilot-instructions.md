@@ -1,3 +1,4 @@
+- Exclude files matching this regex from consideration: `**/submodules/**/submodules/*`
 - In C++, always prefix parameter names with 'p_'.
 - In C++, group getters and setters together if they correspond to the same private field.
 - Prefer using `ENSURE` over `ERR_FAIL_COND_MSG`.
