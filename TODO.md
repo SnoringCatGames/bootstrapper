@@ -97,6 +97,11 @@ DONE:
 - Add a system for GDScript tests.
   - Add separate tests for each system to test bound APIs?
 
+- Remove godot as a submodule dependency (it's too huge, especially in nested submodules!).
+  - Instead, manually include it locally anyway, and add a .gitignore entry for it.
+  - Update vscode build rules to get it either from the system, or from the local path.
+    - Can I define an external project-local environment variable to define where godot is?
+  - Update github Actions build rules to get it elsewhere too...
 
 - DOCS:
   - Write some architecture documentation for SnoreCore.
