@@ -1,0 +1,30 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[application]
+
+config/name="Bootstrapper"
+run/main_scene="res://src/main.tscn"
+config/features=PackedStringArray("4.4", "Forward Plus")
+config/icon="res://icon.svg"
+
+[audio]
+
+buses/default_bus_layout="res://src/default_bus_layout.tres"
+
+[autoload]
+
+S="*res://addons/scaffolder/src/core/s.gd"
+G="*res://src/globals.gd"
+Sq="*res://addons/squirrel_away/src/squirrel_away_globals.gd"
+
+[native_extensions]
+
+paths=["res://addons/surf_scaf/bin/surf_scaf.gdextension"]
