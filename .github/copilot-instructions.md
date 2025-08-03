@@ -21,6 +21,7 @@
   - For `.cpp` files and for test files, include the header file of the same name first and with an empty line separatating it from the rest of the includes.
 - For tests:
   - Prefix the filename with `test_`.
+  - Place test files in the same directory as the file they're testing.
   - Use `TEST` instead of `TEST_F` unless you need to set up a fixture.
   - Use `Test` as a suffix for the first argument to the `TEST` macro, and do not include the substring `Test` in the second argument.
     - Similarly, if using a fixture, use `Test` as a suffix for the fixture class name.

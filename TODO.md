@@ -42,27 +42,13 @@ https://docs.godotengine.org/en/stable/tutorials/scripting/gdextension/gdextensi
 
 FIXME: LEFT OFF HERE: ---------------------------------------------------
 
-----
-DONE:
-- Logger
-- Utils
-- CircularBuffer
-- 
-----
+- Rename Surfacer "Handler" and "Manager" classes to "Service".
+
+- CanvasLayer and Shell tests.
 
 - Search for and remove _ready()
-- Break-apart ScaffolderShell into two parts:
-  - One stays in GDScript and handles all the event handling.
-  - One stays in C++ and handles canvas layers.
-  - Rename the C++ version to CanvasLayersController.
 
-- Finish reviewing shell/canvas-layer classes.
-- Finish reviewing utils.
-- Finish reviewing logger.
-- Review circular buffer.
-- Review screen classes.
 - Review time classes.
-- Scan through all pending changes.
 
 - Finish porting Scaffolder to C++.
   - But leave some stuff in GDScript.
