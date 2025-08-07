@@ -6,8 +6,10 @@
 - Modify variables with the `const` keyword when possible.
 - Include periods after comments.
 - In C++, include one-line member function definitions in the header file.
-- Don't include trailing comments at the end of a line. Place those comments on their own preceding line instead.
-- When you leave comments about logic that you didn't finish implementing, annotate them with `// FIXME: LEFT OFF HERE: ...`.
+- For comments:
+  - Don't include trailing comments at the end of a line. Place those comments on their own preceding line instead.
+  - Don't include comments that don't add value beyond restating what should already be obvious from the corresponding variable or function names.
+  - When you leave comments about logic that you didn't finish implementing, annotate them with `// FIXME: LEFT OFF HERE: ...`.
 - Never include `using namespace ...` in a header file.
 - When possible, forward declare type dependencies in header files and only include them in the implementation files.
 - Never use the `auto` keyword.

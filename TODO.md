@@ -42,19 +42,22 @@ https://docs.godotengine.org/en/stable/tutorials/scripting/gdextension/gdextensi
 
 FIXME: LEFT OFF HERE: ---------------------------------------------------
 
-- Rename Surfacer "Handler" and "Manager" classes to "Service".
-
-- CanvasLayer and Shell tests.
-
-- Search for and remove _ready()
-
 - Review time classes.
+
+- Make sure play_sfx is being called for button clicks.
+
+- Get stuff compiling and running, then submit!
 
 - Finish porting Scaffolder to C++.
   - But leave some stuff in GDScript.
   - Review all of the initialization logic that was recently ported.
 
-- Get stuff compiling and running, then submit!
+- Review old Scaffolder GDScript and UI stuff.
+  - What to do with screens?
+
+- Rename Surfacer "Handler" and "Manager" classes to "Service".
+
+- Instead of passing around p_ease_name in time APIs, pass around an enum.
 
 ----
 
