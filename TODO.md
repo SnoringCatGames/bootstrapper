@@ -42,8 +42,6 @@ https://docs.godotengine.org/en/stable/tutorials/scripting/gdextension/gdextensi
 
 FIXME: LEFT OFF HERE: ---------------------------------------------------
 
-- Review time classes.
-
 - Make sure play_sfx is being called for button clicks.
 
 - Get stuff compiling and running, then submit!
@@ -60,6 +58,12 @@ FIXME: LEFT OFF HERE: ---------------------------------------------------
 - Instead of passing around p_ease_name in time APIs, pass around an enum.
 
 ----
+
+- Add diagrams to README files.
+- Add links to original sources:
+  - https://www.websequencediagrams.com/cgi-bin/cdraw?lz=dGl0bGUgU3VyZlNjYWYgSW5pdGlhbGl6YXRpb24KCm5vdGUgcmlnaHQgb2YgQ2xpZW50IEdhbWU6IHZhciBhbGxfc2V0dGluZ3MgPSB7XG4gIFNub3JlQ29yZU1haW5TABYHLAAVBWNhZmZvbGRlcgAJDnVyZmFjAAgNfQoAYAsgLT4ARw46AFoKLnNldF91cCgAfQwpCgoAdw0AJBwASgU6AD4HAIElFSkAOhMAgT8JADEZAIFZEQAzFACBcQcAdhkAggkPAIFEFACDBQ1hbGxfbW9kdWxlc18AghIGX2ZpbmlzaGVkLmVtaXQoKQoK&s=default
+  - https://miro.com/app/board/uXjVJV3LdkE=/
+
 
 - Expose geometry_constants to GDScript.
 - Add (and bind) log-recorded event to logger.
@@ -100,7 +104,7 @@ FIXME: LEFT OFF HERE: ---------------------------------------------------
     - Module and settings classes
     - App registration process and lifecycle
     - Where tests get included
-    - Submit my launch and tasks VSCode Jason files in the repo, and reference them for build commands
+    - Submit my launch and tasks VSCode json files in the repo, and reference them for build commands
     - Also reference the GitHub Actions workflow file
     - SnoreCore is a separate DLL. It knows nothing about the other modules at compile time.
     - Surfacer and Scaffolder are also separate DLLs. They do depend on files from the SnoreCore DLL. But they do not know about each other.
