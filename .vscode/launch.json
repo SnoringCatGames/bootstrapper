@@ -82,7 +82,7 @@
                 // "--headless",
                 // "--upwards",
                 // "--quit",
-                // "--editor",
+                "--editor",
                 // "--verbose",
                 "--path",
                 "${workspaceFolder}/demo"

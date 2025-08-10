@@ -53,10 +53,6 @@ FIXME: LEFT OFF HERE: ---------------------------------------------------
 - Review old Scaffolder GDScript and UI stuff.
   - What to do with screens?
 
-- Rename Surfacer "Handler" and "Manager" classes to "Service".
-
-- Instead of passing around p_ease_name in time APIs, pass around an enum.
-
 ----
 
 - Add diagrams to README files.
