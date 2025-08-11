@@ -53,6 +53,10 @@ FIXME: LEFT OFF HERE: ---------------------------------------------------
 - Review old Scaffolder GDScript and UI stuff.
   - What to do with screens?
 
+- Update Godot shortcut for ctrl+shift+S.
+
+- Make sure logs include ticks since engine start (since ms aren't included in timestamps!).
+
 ----
 
 - Add diagrams to README files.

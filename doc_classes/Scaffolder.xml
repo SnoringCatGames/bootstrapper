@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="Scaffolder" inherits="SnoreCoreRootModule" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>
+	</brief_description>
+	<description>
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_settings" qualifiers="const">
+			<return type="ScaffolderSettings" />
+			<description>
+			</description>
+		</method>
+	</methods>
+	<members>
+		<member name="hud" type="CanvasItem" setter="set_hud" getter="get_hud">
+		</member>
+		<member name="level" type="ScaffolderLevel" setter="set_level" getter="get_level">
+		</member>
+		<member name="session" type="GameSession" setter="set_session" getter="get_session">
+		</member>
+		<member name="super_hud" type="CanvasItem" setter="set_super_hud" getter="get_super_hud">
+		</member>
+	</members>
+	<signals>
+		<signal name="level_ended">
+			<param index="0" name="level" type="Object" />
+			<description>
+			</description>
+		</signal>
+		<signal name="level_loaded">
+			<param index="0" name="level" type="Object" />
+			<description>
+			</description>
+		</signal>
+		<signal name="level_started">
+			<param index="0" name="level" type="Object" />
+			<description>
+			</description>
+		</signal>
+	</signals>
+</class>

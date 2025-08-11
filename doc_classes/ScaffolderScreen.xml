@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="ScaffolderScreen" inherits="PanelContainer" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>
+	</brief_description>
+	<description>
+	</description>
+	<tutorials>
+	</tutorials>
+	<members>
+		<member name="canvas_layer" type="StringName" setter="set_canvas_layer" getter="get_canvas_layer" default="&amp;&quot;screens&quot;">
+		</member>
+		<member name="pauses_game_when_open" type="bool" setter="set_pauses_game_when_open" getter="get_pauses_game_when_open" default="true">
+		</member>
+		<member name="screen_state" type="int" setter="set_screen_state" getter="get_screen_state" enum="ScaffolderScreen.ScreenState" default="0">
+		</member>
+	</members>
+	<constants>
+		<constant name="CLOSED" value="0" enum="ScreenState">
+		</constant>
+		<constant name="OPEN" value="1" enum="ScreenState">
+		</constant>
+		<constant name="TOP" value="2" enum="ScreenState">
+		</constant>
+	</constants>
+</class>

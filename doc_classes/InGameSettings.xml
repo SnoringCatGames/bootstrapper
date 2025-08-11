@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="InGameSettings" inherits="SnoreCoreSubmodule" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>
+	</brief_description>
+	<description>
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_settings_properties">
+			<return type="Dictionary[]" />
+			<description>
+			</description>
+		</method>
+		<method name="update_property">
+			<return type="void" />
+			<param index="0" name="p_name" type="StringName" />
+			<param index="1" name="p_value" type="Variant" />
+			<description>
+			</description>
+		</method>
+	</methods>
+	<members>
+		<member name="music_volume" type="float" setter="set_music_volume" getter="get_music_volume" default="0.5">
+		</member>
+		<member name="sfx_volume" type="float" setter="set_sfx_volume" getter="get_sfx_volume" default="0.5">
+		</member>
+		<member name="show_logs" type="bool" setter="set_show_logs" getter="get_show_logs" default="false">
+		</member>
+	</members>
+	<signals>
+		<signal name="property_changed">
+			<param index="0" name="name" type="StringName" />
+			<param index="1" name="new_value" type="Variant" />
+			<param index="2" name="old_value" type="Variant" />
+			<description>
+			</description>
+		</signal>
+	</signals>
+</class>

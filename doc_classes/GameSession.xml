@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="GameSession" inherits="RefCounted" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>
+	</brief_description>
+	<description>
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="reset">
+			<return type="void" />
+			<description>
+			</description>
+		</method>
+	</methods>
+	<members>
+		<member name="end_time" type="float" setter="set_end_time" getter="get_end_time" default="0.0">
+		</member>
+		<member name="play_time" type="float" setter="" getter="get_play_time" default="0.0">
+		</member>
+		<member name="start_time" type="float" setter="set_start_time" getter="get_start_time" default="0.0">
+		</member>
+	</members>
+</class>
