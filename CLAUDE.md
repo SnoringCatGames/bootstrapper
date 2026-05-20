@@ -20,6 +20,23 @@ minimal during this period — actual code lives on `dev`.
 Long-term, `bootstrapper` is the starter repo to copy-paste-and-edit
 when starting a new Godot 4 game that uses these frameworks.
 
+## Current port state (snapshot, 2026-05-19)
+
+The rewrite is at "vertical slice partly landed" stage, not "code parity
+with Godot 3 minus polish." Phase 2 audit findings:
+
+| Repo | What's there | What's missing |
+|---|---|---|
+| `snore_core` | ~30 prod + ~30 test classes. Services (annotations, canvas_layer, log, time), time helpers (debouncer/interval/stopwatch/throttler/timeout/tween/time_tracker), geometry, circular_buffer, module framework. | Nothing — new repo, no godot3 baseline to port from. |
+| `scaffolder` | 12 C++ prod + 23 GDScript shim files. Module/shell/settings/level/game_session/audio_service/in_game_settings, screen system, 6 screens + ~9 widgets. | **Most of the godot3 ~220-file surface area**: annotator framework, color_config, level_button/level_select, accordions, radial_menus, notifications, info_panel, camera framework, character framework, plugger asset editor, half of utils. Open question whether these are dropped or deferred. |
+| `surfacer` | ~25 prod classes. Surface graph foundations (surface/chunk/finder/parser/store/graph, tile_map_surface_parser), agent layer, annotations, movement_profile/settings. | Edge/movement calculators (jump, walk, climb, fall trajectories), platform-graph builder, pathfinding A*/edge-cost layer. ROADMAP Phase 3 acknowledges this as the biggest remaining lift. |
+| `surf_scaf` | 1 file — just the bundle entry point. | Nothing of its own; it's intentionally a shell. |
+| `squirrel_away` | **Empty.** Top-level scaffolding exists but `src/` and `addon/src/` have no `.gd` or `.cpp` files. | The entire godot3 game (cat, squirrel, levels, tilemaps, configs) hasn't been re-introduced yet. No dogfood-able example game today. |
+
+If a future task asks "how do I use feature X from the framework", first
+check whether X is actually implemented yet. The godot3 branches on
+scaffolder/surfacer/squirrel_away preserve the reference impl.
+
 ## Repo ecosystem
 
 | Repo | Role | Default branch |
@@ -79,21 +96,74 @@ docs — the default-branch view will fill in over time.
 - **SCons** is the build tool. Each framework has its own `SConstruct`
   that invokes shared helpers in `submodules/snore_core/build_utils.py`.
 - Build flags: `sc_dev`, `sc_tests`, `sc_ci`, `sc_zip`. `sc_tests=yes`
-  defines `SC_TESTS_ENABLED` and pulls in googletest.
+  defines `SC_TESTS_ENABLED` and pulls in googletest sources.
 - **Static linking** is the model — each downstream framework compiles
   its upstream sources into its own binary (so `scaffolder.so` contains
   snore_core's compiled code, etc.). No runtime cross-extension DLL
   deps.
 - Bootstrapper's `demo/` project loads only `surf_scaf.gdextension`.
+  Bootstrapper's `SConstruct` itself rebuilds the surf_scaf bundle into
+  `demo/addons/surf_scaf/bin/` rather than reusing `submodules/surf_scaf/
+  addon/bin/`, so building bootstrapper produces a second copy of the
+  same binary. Building surf_scaf standalone first is unnecessary if you
+  only need the demo. Phase 2.5 (workspace siblings) is the right place
+  to collapse this duplication.
 
-## Repository layout (current)
+### Double-registration risk
 
-Currently each framework has its upstreams + godot-cpp + godot +
-googletest as nested git submodules. This means snore_core, godot-cpp,
-godot, and googletest each get cloned multiple times across the tree.
-**This is on the roadmap to change** — see ROADMAP Phase 2.5
-(workspace-level siblings). Until then, expect deep nesting and
-duplication.
+The repo carries four `.gdextension` manifests in source —
+`snore_core.gdextension`, `scaffolder.gdextension`, `surfacer.gdextension`,
+`surf_scaf.gdextension`. Only `surf_scaf.gdextension` is loaded by the
+demo today, and that is the supported configuration. **If a downstream
+project ever loads two of these manifests at once** (e.g., `surf_scaf` +
+`scaffolder`), both entry points will call their statically-linked copy of
+`SnoreCore::register_gdextension_types`, and Godot's `ClassDB::register_
+class<>` will abort on the duplicate. There is no runtime guard. Safest
+fix is to delete the three redundant manifests on `dev`; alternative is a
+`static bool registered;` guard in each namespaced
+`register_gdextension_types`.
+
+### Test source wiring caveat
+
+`set_up()` in `submodules/snore_core/build_utils.py` gates googletest
+source inclusion on `env["includes_tests"]` only — independent from
+`env["includes_dev"]`. That means `sc_tests=yes sc_dev=no` ships gtest
+source into a release-mode artifact. The CPP defines (`SC_TESTS_ENABLED`,
+`SC_DEV_ENABLED`) are independent flags, but source inclusion shouldn't
+be. If you add a CI invocation that runs tests in release mode, gate
+those source files on `includes_dev AND includes_tests` first.
+
+## Repository layout
+
+**Workspace-sibling layout** (since 2026-05-20, ROADMAP Phase 2.5 done):
+
+```
+~/Repositories/
+├── bootstrapper/   (this repo — umbrella + demo)
+├── snore_core/
+├── scaffolder/
+├── surfacer/
+├── surf_scaf/
+├── squirrel_away/
+├── godot-cpp/      (4.4 branch, with local TypedArray::debug patch)
+├── godot/          (master, kept for the user's own custom-build work)
+└── googletest/
+```
+
+Each repo's build scripts look for `../<dep>/` relative to wherever
+SCons is invoked. `.gitmodules` is empty/absent in every framework
+repo. Cross-framework edits happen inline at the workspace level — no
+SHA bumping, no submodule pointer maintenance.
+
+**Fresh-machine setup:** clone bootstrapper, run
+`scripts/bootstrap-workspace.ps1`. The script idempotently clones every
+required sibling next to the workspace root.
+
+**Historical note:** until Phase 2.5 landed, each framework had its
+upstreams + godot-cpp + godot + googletest as nested git submodules.
+This produced multi-GB redundant clones (5+ copies of godot-cpp/godot
+across the tree) and forced N× SHA bumping. The flat sibling layout
+replaces that.
 
 ## GitHub Actions
 

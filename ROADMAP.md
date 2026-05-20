@@ -16,10 +16,19 @@ its submodules). For "what just happened / how to resume", see
    constructed levels without preparsing a static level into a platform
    graph.
 
-## Now (Phase 2 — assess the current state)
+## Now (Phase 3 — finish the port, ship the framework)
 
-Code review of what landed during the WIP porting before the long pause.
-Doesn't write new code; produces findings + a coverage matrix.
+Phase 2 (assess) **complete as of 2026-05-19**. Phase 2.5 (workspace-
+sibling refactor) **complete as of 2026-05-20**. Findings + decisions
+landed in HANDOVER.md ("Phase 2 findings summary", "Phase 2.5 summary")
+and CLAUDE.md ("Current port state" + build-system caveats).
+
+The next active phase is Phase 3 (see below).
+
+## Phase 2 (assess the current state — DONE 2026-05-19)
+
+Original phase intent: code review of what landed during the WIP
+porting before the long pause. No new code; findings + coverage matrix.
 
 ### 2.1 — GDExtension cross-dep architecture review
 
@@ -135,7 +144,18 @@ Tasks:
 Deliverable: a one-screen summary in the response (and in HANDOVER)
 of what changed, what's now wrong in old docs, what was fixed up.
 
-## Phase 2.5 — Architectural restructure: workspace-level siblings
+## Phase 2.5 — Architectural restructure: workspace-level siblings (DONE 2026-05-20)
+
+**Status: complete.** All six SnoringCat repos + the third-party deps
+(godot, godot-cpp, googletest) now live as workspace siblings under
+`~/Repositories/`. Each framework's `SConstruct` + `build_utils.py`
+references `../<dep>/` instead of `submodules/<dep>/`. `.gitmodules`
+is empty/absent in every framework repo. New
+`scripts/bootstrap-workspace.ps1` on bootstrapper clones every required
+sibling idempotently. See HANDOVER.md "Phase 2.5 summary" for details.
+
+The remainder of this section is the original rationale, kept for
+traceability.
 
 Currently each framework (snore_core, scaffolder, surfacer, surf_scaf,
 squirrel_away) has its upstreams AND godot-cpp + godot + googletest as
@@ -269,6 +289,33 @@ Order is flexible and depends on Phase 2 findings.
 
 ## Housekeeping (do whenever it fits)
 
+Items in **bold** below were surfaced by the Phase 2.1 architecture review.
+
+- [ ] **Delete the redundant `.gdextension` manifests on `dev`** —
+  `submodules/snore_core/addon/bin/snore_core.gdextension`,
+  `submodules/scaffolder/addon/bin/scaffolder.gdextension`,
+  `submodules/surfacer/addon/bin/surfacer.gdextension`. The demo only
+  loads `surf_scaf.gdextension`; the other three are double-registration
+  footguns if any future game accidentally loads two manifests. Document
+  in each lib's README that the bundle is the supported loading path.
+- [ ] **Gate googletest source inclusion** on
+  `env["includes_dev"] AND env["includes_tests"]` in
+  `submodules/snore_core/build_utils.py::set_up` (currently only
+  `includes_tests`). Today `sc_tests=yes sc_dev=no` would ship gtest
+  source into a release artifact.
+- [ ] **Fix the broken `[icons]` blocks** in the `.gdextension` manifests
+  (snore_core.gdextension, scaffolder.gdextension, surf_scaf.gdextension —
+  all point at placeholder `GDExample` and cross-addon `res://` paths
+  that don't make sense). Currently marked `FIXME` in source.
+- [ ] **Update the gdext#615 comments** in
+  `register_gdextension_types.cpp` files to also cite
+  `godot-proposals#13997` (the actual engine proposal for cross-extension
+  class inheritance; gdext#615 is the rust-bindings tracker).
+- [ ] **Decide bootstrapper's relationship to surf_scaf's artifact**.
+  Today bootstrapper rebuilds the surf_scaf bundle into
+  `demo/addons/surf_scaf/bin/` from scratch. Options: keep duplicating,
+  symlink surf_scaf's bin/, or fold the demo into surf_scaf itself.
+  Likely resolved by Phase 2.5.
 - [ ] Rename local working directory
   `C:\Users\lsl\Repositories\bootstrapper2\` → `bootstrapper\`. Cosmetic.
   Close Godot + IDEs first.

@@ -2,7 +2,12 @@
 import os
 import sys
 
-from submodules.snore_core.build_utils import (
+# Workspace-sibling layout: framework deps live next to bootstrapper at
+# ~/Repositories/<name>/, not nested under submodules/. See ROADMAP.md
+# Phase 2.5 and CLAUDE.md for the rationale.
+sys.path.insert(0, os.path.abspath(".."))
+
+from snore_core.build_utils import (
     add_submodule_to_zip,
     create_submodule_addons_symlinks,
     default_addon_dir_name as snore_core_addon_dir_name,
@@ -11,20 +16,20 @@ from submodules.snore_core.build_utils import (
     set_up as set_up_snore_core,
     print_warning,
 )
-from submodules.scaffolder.build_utils import (
+from scaffolder.build_utils import (
     default_addon_dir_name as scaffolder_addon_dir_name,
     set_up as set_up_scaffolder,
 )
-from submodules.surfacer.build_utils import (
+from surfacer.build_utils import (
     default_addon_dir_name as surfacer_addon_dir_name,
     set_up as set_up_surfacer,
 )
-from submodules.surf_scaf.build_utils import (
+from surf_scaf.build_utils import (
     default_addon_dir_name as surf_scaf_addon_dir_name,
     default_lib_name as surf_scaf_lib_name,
     set_up as set_up_surf_scaf,
 )
-from submodules.squirrel_away.build_utils import (
+from squirrel_away.build_utils import (
     default_addon_dir_name as squirrel_away_addon_dir_name,
 )
 from build_utils import (

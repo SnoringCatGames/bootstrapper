@@ -3,7 +3,7 @@ import os
 
 def create_symlink_for_surf_scaf_extension_manifest() -> None:
     source_path = os.path.abspath(
-        "submodules/surf_scaf/addon/bin/surf_scaf.gdextension"
+        "../surf_scaf/addon/bin/surf_scaf.gdextension"
     )
     link_path = os.path.abspath("demo/addons/surf_scaf/bin/surf_scaf.gdextension")
 

@@ -1,7 +1,9 @@
 # Handover — Godot rewrite, resume point
 
 Snapshot of where the SnoringCat Godot rewrite is at the time of writing.
-Phase 1 (repo surgery) is complete; Phase 2 (code review) is the next work.
+Phase 1 (repo surgery), Phase 2 (code review + audit + context refresh),
+and Phase 2.5 (workspace-sibling refactor) are all complete. Phase 3
+(finish the port) is the next active work.
 
 The original full plan, including the pre-execution research and rationale,
 is at `C:\Users\lsl\.claude\plans\spicy-splashing-shamir.md` on this
@@ -96,32 +98,125 @@ Scratch clones used during the swap live at `C:\tmp\surgery\` and
   working trees (the lowercase-m entries from `git status`). These are
   dev-branch in-flight state; left untouched.
 
+## Phase 2 findings summary (2026-05-19)
+
+**2.1 — GDExtension architecture review:** The static-link/chain-register
+pattern is sound and matches the Godot-4 constraint. Key risks landed in
+CLAUDE.md (build system section): (a) double-registration if any project
+loads more than one of the four in-source `.gdextension` manifests; (b)
+googletest source inclusion is gated on `sc_tests` alone, so release
+builds with tests on ship gtest in the binary; (c) bootstrapper rebuilds
+surf_scaf into its own bin/ rather than reusing — duplicate build work.
+Concrete action items moved to ROADMAP housekeeping.
+
+**2.2 — Port audit:** This is a restructure, not a 1:1 translation, so
+the "diff godot3:foo vs master:foo" exercise wasn't useful. Coverage
+matrix landed in CLAUDE.md ("Current port state"). Headline: scaffolder
+has a narrow vertical slice (~12 C++ + ~23 .gd of the ~220 godot3 source
+files); surfacer has the surface-graph foundation but lacks
+edge/movement calculators and pathfinding; **squirrel_away is empty**
+(no .gd, no .cpp in `src/` or `addon/src/`). snore_core is wholly new
+and fairly thorough. surf_scaf is intentionally just a bundle shell.
+
+**2.3 — Context refresh (this pass):** CLAUDE.md, HANDOVER.md, ROADMAP.md
+all updated to reflect 2.1/2.2 findings. Workspace CLAUDE.md unchanged —
+it already flags the WIP nature.
+
+**Decisions still open** (questions Phase 2 surfaced for the user):
+
+1. Are the missing scaffolder systems (annotators, color_config,
+   level_button/select, accordions, radial_menus, notifications, camera +
+   character framework, plugger) *intentionally dropped* or *deferred to
+   Phase 3*? CLAUDE.md should be updated either way.
+2. Is bootstrapper rebuilding surf_scaf intentional, or should bootstrapper
+   become "no-build, just consume surf_scaf's prebuilt artifact"? Phase 2.5
+   would naturally collapse this.
+3. Standalone-loadable `scaffolder.gdextension` — ever a real use case (e.g.,
+   Asset Library), or safe to delete?
+
+## Phase 2.5 summary (2026-05-20)
+
+**Workspace-sibling refactor — complete.** All six repos
+(snore_core, scaffolder, surfacer, surf_scaf, squirrel_away, bootstrapper)
+plus the third-party deps (godot, godot-cpp, googletest) now live as
+siblings under `~/Repositories/`. Each repo's build scripts look for
+`../<dep>/` instead of `submodules/<dep>/`. The nested submodule trees
+are gone — `.gitmodules` is empty/absent in every framework repo.
+
+What changed concretely:
+
+- Each framework's `SConstruct` / `build_utils.py` now adds `..` to
+  `sys.path` and imports `from <sibling>.build_utils import ...`.
+- Path strings `submodules/<name>/src/` → `../<name>/src/`. Resolves
+  correctly when SCons is invoked from any sibling's directory.
+- Error messages on missing siblings name the expected path and point
+  at `scripts/bootstrap-workspace.ps1`.
+- snore_core's googletest source inclusion is now gated on
+  `includes_dev AND includes_tests` (was just `includes_tests` — would
+  have shipped gtest into release builds).
+- `~/Repositories/godot-cpp/` switched from `master` to `4.4`, with the
+  local `TypedArray<T>::debug()` patch + template-instantiations file
+  re-applied.
+- New: `scripts/bootstrap-workspace.ps1` on bootstrapper. Idempotently
+  clones every required sibling next to the workspace root.
+- Per-framework README appended with a "Building" section pointing at
+  the bootstrap script.
+
+Local cleanup that landed alongside:
+
+- Removed the stray empty `bootstrapper/godot/`, `godot-cpp/`,
+  `googletest/` top-level directories that had been sitting at the
+  repo root (artifacts from a prior layout).
+
+What still needs the user's attention (one-time):
+
+1. **Move bootstrapper's `.local-patches/` decision.** The patch + the
+   template-instantiations source file have been applied to
+   `~/Repositories/godot-cpp/` so the build works from siblings.
+   `.local-patches/` itself still sits at bootstrapper's repo root,
+   untracked. Decide whether to keep it as a re-apply source or remove
+   it now that godot-cpp carries the changes directly.
+2. **Verify a full build from bootstrapper.** Python imports
+   smoke-test passed during the refactor, but a full SCons compile was
+   not run. Run `scons sc_dev=yes sc_tests=yes` from
+   `~/Repositories/bootstrapper2/` (or `bootstrapper/` post-rename) to
+   confirm.
+3. **Rename the local dir** `bootstrapper2/` → `bootstrapper/`. Still
+   cosmetic and still pending.
+
 ## Known followups
 
-Forward-looking work — including Phase 2 (review), Phase 3 (port + framework
-work), Phase 4 (dynamic surfacer pathfinding), and housekeeping — is tracked
-in [ROADMAP.md](ROADMAP.md).
+Forward-looking work — Phase 2.5 (workspace siblings), Phase 3 (port +
+framework work), Phase 4 (dynamic surfacer pathfinding), and housekeeping —
+is tracked in [ROADMAP.md](ROADMAP.md).
 
 Top items at the time of writing:
 
-1. Rename local working directory `bootstrapper2\` → `bootstrapper\`
+1. **Verify full SCons build** from bootstrapper end-to-end (Phase 2.5
+   smoke-tested Python imports only).
+2. **Phase 3 — finish the port.** Scaffolder/surfacer port gaps from
+   Phase 2.2 audit; squirrel_away game logic; framework setup
+   improvements.
+3. Delete redundant `.gdextension` manifests (closes the
+   double-registration risk; see ROADMAP housekeeping).
+4. Rename local working directory `bootstrapper2\` → `bootstrapper\`
    (cosmetic; close Godot + IDEs first).
-2. Phase 2.1 — GDExtension cross-dep architecture review.
-3. Phase 2.2 — Old vs new port audit.
-4. Delete `C:\tmp\sc-backup\*.git` mirrors after ~2026-05-26.
+5. Delete `C:\tmp\sc-backup\*.git` mirrors after ~2026-05-26.
 
 ## Quick-start for the next session
 
 ```pwsh
 cd C:\Users\lsl\Repositories\bootstrapper2   # (or `bootstrapper` if renamed)
-git status --short --ignore-submodules=all   # expect: clean
+git status --short                            # expect: clean
 git remote -v                                 # expect: origin=bootstrapper.git
-git -C submodules/scaffolder remote -v        # expect: scaffolder (no `2`)
-git -C submodules/squirrel_away remote -v     # expect: squirrel_away
-git submodule status                          # all SHAs reachable
+ls ..                                          # expect siblings: snore_core,
+                                               # scaffolder, surfacer,
+                                               # surf_scaf, squirrel_away,
+                                               # godot-cpp, godot, googletest
+scons sc_dev=yes sc_tests=yes                  # full build
 ```
 
-Then jump to Phase 2.1 above.
+Then jump to Phase 3 (port + framework work) in ROADMAP.md.
 
 ## Project context summary
 
