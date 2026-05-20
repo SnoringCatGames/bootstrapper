@@ -104,6 +104,37 @@ Deliverable:
 3. Porting-bug log (per-class, with old vs new line refs).
 4. "Stayed in GDScript" list with rationale.
 
+### 2.3 — Architecture audit + persistent-context refresh
+
+After 2.1 and 2.2 produce their findings, do one pass that synthesizes
+them into the persistent context Claude Code reads on every future
+session. The goal: anyone (or any future-Claude) starting work on this
+ecosystem reads the right docs and gets the current mental model
+without needing to re-derive it.
+
+Tasks:
+
+- [ ] Take the 2.1 + 2.2 findings and update the
+  authoritative project doc — `bootstrapper/CLAUDE.md` — to reflect
+  any architectural truths that surfaced (e.g., changes in the
+  dependency graph, build-system patterns, gotchas).
+- [ ] Update HANDOVER.md if any of the "Known followups" or
+  "Decisions made during execution" sections turn out to be wrong
+  or outdated.
+- [ ] Update the workspace-level guide (`~/Repositories/CLAUDE.md`,
+  symlink-tracked into claude-config) if the entry there needs more
+  detail or any of the assertions need correction.
+- [ ] Decide whether any reusable behavior belongs as a custom
+  skill under `~/Repositories/claude-config/skills/<name>/` (e.g., a
+  "bump-framework-submodule" helper analogous to
+  `bump-platform-submodule` for hopnbop). Land it if so.
+- [ ] Once the workspace-sibling refactor (2.5) lands, all of the
+  above need another pass — the architecture changes meaningfully
+  enough to invalidate prior docs.
+
+Deliverable: a one-screen summary in the response (and in HANDOVER)
+of what changed, what's now wrong in old docs, what was fixed up.
+
 ## Phase 2.5 — Architectural restructure: workspace-level siblings
 
 Currently each framework (snore_core, scaffolder, surfacer, surf_scaf,
