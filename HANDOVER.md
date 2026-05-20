@@ -96,36 +96,19 @@ Scratch clones used during the swap live at `C:\tmp\surgery\` and
   working trees (the lowercase-m entries from `git status`). These are
   dev-branch in-flight state; left untouched.
 
-## Known followups (priority order)
+## Known followups
 
-1. **Rename local working directory**
-   `C:\Users\lsl\Repositories\bootstrapper2\` → `bootstrapper\`. Cosmetic,
-   but matches the GitHub rename. Close Godot + IDEs first (they cache
-   resource paths). No `git` reconfig needed afterward — `origin` URL is
-   already `bootstrapper.git`.
-2. **Phase 2.1 — GDExtension cross-dep architecture review.** Read in
-   this order: `SConstruct`, `submodules/snore_core/build_utils.py`,
-   each submodule's `SConstruct` + `build_utils.py`, each
-   `src/register_gdextension_types.cpp`, each
-   `addon/bin/*.gdextension`. Look for idempotency of the registration
-   chain, symbol-visibility issues, SCons globbing duplication. External
-   research: godot-cpp template, godot-rust/gdext#615, multi-extension
-   shared-types patterns.
-3. **Phase 2.2 — Old vs new port audit** for scaffolder, snore_core,
-   squirrel_away (skip deep surfacer per scope). Build a side-by-side
-   coverage matrix using the `godot3` branch (now live on each old repo)
-   vs the new master/main.
-4. **Resolve in-flight submodule pointer drift** on `dev` (the lowercase-m
-   entries inside `surf_scaf` and `squirrel_away`). Once the dev-branch
-   porting work is at a checkpoint, land a "Bump submodule pointers"
-   commit.
-5. **Delete `C:\tmp\sc-backup\*.git` mirrors** after ~2026-05-26 if no
-   rollback was needed.
-6. **Consider `scaffolder-bootstrap`** — shows up in the org repo list but
-   wasn't part of this surgery and wasn't mentioned. Possibly obsolete;
-   archive or delete if so.
-7. **Investigate `git submodule sync --recursive`** no-op (see decision #2
-   above).
+Forward-looking work — including Phase 2 (review), Phase 3 (port + framework
+work), Phase 4 (dynamic surfacer pathfinding), and housekeeping — is tracked
+in [ROADMAP.md](ROADMAP.md).
+
+Top items at the time of writing:
+
+1. Rename local working directory `bootstrapper2\` → `bootstrapper\`
+   (cosmetic; close Godot + IDEs first).
+2. Phase 2.1 — GDExtension cross-dep architecture review.
+3. Phase 2.2 — Old vs new port audit.
+4. Delete `C:\tmp\sc-backup\*.git` mirrors after ~2026-05-26.
 
 ## Quick-start for the next session
 
