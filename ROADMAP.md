@@ -104,20 +104,44 @@ Deliverable:
 3. Porting-bug log (per-class, with old vs new line refs).
 4. "Stayed in GDScript" list with rationale.
 
-## Phase 2.5 — Architectural restructure: siblings, not nested submodules
+## Phase 2.5 — Architectural restructure: workspace-level siblings
 
 Currently each framework (snore_core, scaffolder, surfacer, surf_scaf,
-squirrel_away) has its upstreams as nested git submodules. snore_core
-gets cloned ~4× (inside scaffolder, surfacer, surf_scaf, and the top-
-level bootstrapper). Same kind of duplication for scaffolder and
-surfacer. Unwieldy: deep nesting, painful atomic cross-repo edits, 4×
-disk, 4× SHA-bumping when anything in snore_core changes.
+squirrel_away) has its upstreams AND godot-cpp + godot + googletest as
+nested git submodules. Inside bootstrapper, that means godot-cpp, godot,
+and googletest each get cloned ~5–8 times (once per framework). Add
+duplication of snore_core / scaffolder / surfacer inside their downstream
+frameworks. And every new game made from bootstrapper repeats the same
+mass duplication. The cost is enormous: deep nesting, painful atomic
+cross-repo edits, multi-GB redundant clones (godot engine source is
+huge), N× SHA bumping when anything moves.
 
-**Recommended layout:** keep bootstrapper as the umbrella with all 5
-SnoringCat frameworks as direct submodules, but have each framework
-expect its SnoringCat upstreams as **sibling directories on disk** rather
-than nested submodules. Each framework's SCons asserts that siblings
-exist and errors out helpfully if not.
+**Recommended layout: workspace-level siblings for everything.**
+
+```
+~/Repositories/
+├── snore_core/      (cloned once)
+├── scaffolder/      (cloned once)
+├── surfacer/        (cloned once)
+├── surf_scaf/       (cloned once)
+├── squirrel_away/   (cloned once)
+├── godot-cpp/       (cloned once)
+├── godot/           (cloned once — kept; the user has a reason)
+├── googletest/      (cloned once)
+├── bootstrapper/    (cloned once — example/template, no submodules)
+├── game1/           (a real game — no submodules)
+└── game2/           (another game — no submodules)
+```
+
+One copy of each dependency per machine. Each framework + game asserts
+the expected siblings exist at build time. Edits to a framework are
+seen by every downstream game on next build, no SHA bumps. New-machine
+setup is a small bootstrap script that clones each sibling.
+
+This is the standard layout for solo C++ devs with multiple projects
+sharing the same in-house frameworks. The cost — losing pinned per-game
+SHAs — doesn't matter here because the user isn't shipping versioned
+framework releases.
 
 ### Background — why surf_scaf must remain a bundled extension
 
@@ -140,38 +164,57 @@ boundary.
 
 ### Tasks
 
-- [ ] Audit references to nested submodule paths in each framework's
-  build files (`SConstruct`, `build_utils.py`, `.gdextension` manifests,
-  any asset paths). Grep for `submodules/snore_core`, `submodules/
-  scaffolder`, `submodules/surfacer` from inside each framework.
+- [ ] Audit references to nested submodule paths across the
+  ecosystem. Grep each framework for `submodules/snore_core`,
+  `submodules/scaffolder`, `submodules/surfacer`, `submodules/godot-cpp`,
+  `submodules/godot`, `submodules/googletest` in `SConstruct`,
+  `build_utils.py`, `.gdextension` manifests, asset paths.
 - [ ] Update each framework's `SConstruct` / `build_utils.py` to look
-  for `../snore_core/` (etc.) instead of `submodules/snore_core/`.
-- [ ] Add a build-time assertion: clear error message naming the
+  for `../<dep>/` instead of `submodules/<dep>/`.
+- [ ] Add build-time assertions: clear error messages naming each
   expected sibling path and how to clone it.
-- [ ] Remove the nested SnoringCat submodule registrations from each
-  framework's `.gitmodules`. After this, only third-party deps
-  (godot-cpp + godot + googletest) remain as submodules in each
-  framework.
-- [ ] Add a `scripts/bootstrap-siblings.ps1` (or just README instructions)
-  per framework — clones missing siblings next to the current dir for
-  standalone workflows.
-- [ ] Update each framework's README to document the sibling layout.
-- [ ] Verify build still works end-to-end from the bootstrapper umbrella.
+- [ ] Remove all `[submodule "..."]` entries from each framework's
+  `.gitmodules`. After this, each framework's `.gitmodules` is either
+  empty or doesn't exist.
+- [ ] Add a `scripts/bootstrap-workspace.ps1` (probably owned by
+  bootstrapper) that clones every required sibling next to the current
+  dir if it's not already present. Idempotent. Invoked once per new
+  developer machine.
+- [ ] Update each framework's README to document the workspace-sibling
+  layout (point at bootstrapper's bootstrap script).
+- [ ] Verify build still works end-to-end from inside bootstrapper.
 - [ ] Update bootstrapper's HANDOVER.md once the layout change ships.
 
 ### Notes
 
+- **`godot` submodule stays** — user has a reason to keep full Godot
+  engine source (custom editor builds, templates, etc.). It joins the
+  workspace-sibling pool like the others.
 - **Why not monorepo?** scaffolder + surfacer are public with godot-3-era
   Godot Asset Library entries (asset-lib-v0.7.0 branch preserved on each).
   snore_core / surf_scaf / squirrel_away / bootstrapper are private. Mixed
-  visibility kills the monorepo option.
-- **Why bootstrapper stays the umbrella with submodules:** matches the
-  godot-cpp / godot-cpp-template ecosystem norm. Cloning bootstrapper
-  recursively gives a contributor everything they need.
-- **Workflow:** cd into bootstrapper, single editor window opens the
-  whole tree, edits to frameworks happen inline as siblings (e.g.
-  `cd submodules/scaffolder && edit && commit`), bump-pointer commits on
-  bootstrapper roll up across frameworks.
+  visibility blocks monorepo.
+- **What bootstrapper becomes:** small example/template repo. Holds
+  the bootstrap script, the demo project, and maybe a top-level
+  `SConstruct` that wraps building all frameworks. No submodules.
+- **What new games become:** small repos with their own game code +
+  the same expectation that frameworks live as workspace siblings. Made
+  by copy-pasting bootstrapper.
+- **Workflow:** cd into any repo at workspace root, single editor window
+  opens the whole tree (or open the parent dir). Cross-framework edits
+  happen inline. Commits go to each repo independently. Bootstrapper
+  doesn't need bump-pointer commits any more.
+- **New-machine setup:** clone bootstrapper, run
+  `scripts/bootstrap-workspace.ps1`. Script clones every sibling repo
+  (snore_core, scaffolder, surfacer, surf_scaf, squirrel_away,
+  godot-cpp, godot, googletest) at the workspace level.
+- **Existing-machine migration:** the SnoringCat sibling repos already
+  exist at `~/Repositories/` for the swapped ones (scaffolder, surfacer,
+  squirrel_away) — they were re-created by the Phase 1 surgery. The
+  new-only ones (snore_core, surf_scaf) and the third-party deps
+  (godot-cpp, godot, googletest) need to be cloned out from their
+  current nested locations into workspace siblings before doing the
+  build-system rewrite.
 
 ## Next (Phase 3 — finish the port, ship the framework)
 
