@@ -104,6 +104,75 @@ Deliverable:
 3. Porting-bug log (per-class, with old vs new line refs).
 4. "Stayed in GDScript" list with rationale.
 
+## Phase 2.5 — Architectural restructure: siblings, not nested submodules
+
+Currently each framework (snore_core, scaffolder, surfacer, surf_scaf,
+squirrel_away) has its upstreams as nested git submodules. snore_core
+gets cloned ~4× (inside scaffolder, surfacer, surf_scaf, and the top-
+level bootstrapper). Same kind of duplication for scaffolder and
+surfacer. Unwieldy: deep nesting, painful atomic cross-repo edits, 4×
+disk, 4× SHA-bumping when anything in snore_core changes.
+
+**Recommended layout:** keep bootstrapper as the umbrella with all 5
+SnoringCat frameworks as direct submodules, but have each framework
+expect its SnoringCat upstreams as **sibling directories on disk** rather
+than nested submodules. Each framework's SCons asserts that siblings
+exist and errors out helpfully if not.
+
+### Background — why surf_scaf must remain a bundled extension
+
+Researched 2026-05-19, confirmed against current Godot 4 master.
+
+- Godot 4 cannot let one GDExtension depend on another GDExtension's
+  classes. The engine prints `ERR_PRINT("Unimplemented yet")` in
+  `core/extension/gdextension.cpp::_register_extension_class_internal()`
+  when a child class's parent resolves to another extension.
+- `gdext#615` and `godot-proposals#13997` are both still **open** with
+  no shipped resolution; resolution depends on multi-quarter Godot-core
+  work tied to the C#-on-GDExtension migration.
+- `submodules/surf_scaf/README.md` already documents the rationale.
+- Real-world peers (Kehom/GDExtensionPack, LimboAI, godot-jolt) all use
+  the single-bundled-extension pattern.
+
+Don't try to "un-bundle" surf_scaf. The architectural concern here is
+purely the build-system / git-layout layer underneath, not the GDExtension
+boundary.
+
+### Tasks
+
+- [ ] Audit references to nested submodule paths in each framework's
+  build files (`SConstruct`, `build_utils.py`, `.gdextension` manifests,
+  any asset paths). Grep for `submodules/snore_core`, `submodules/
+  scaffolder`, `submodules/surfacer` from inside each framework.
+- [ ] Update each framework's `SConstruct` / `build_utils.py` to look
+  for `../snore_core/` (etc.) instead of `submodules/snore_core/`.
+- [ ] Add a build-time assertion: clear error message naming the
+  expected sibling path and how to clone it.
+- [ ] Remove the nested SnoringCat submodule registrations from each
+  framework's `.gitmodules`. After this, only third-party deps
+  (godot-cpp + godot + googletest) remain as submodules in each
+  framework.
+- [ ] Add a `scripts/bootstrap-siblings.ps1` (or just README instructions)
+  per framework — clones missing siblings next to the current dir for
+  standalone workflows.
+- [ ] Update each framework's README to document the sibling layout.
+- [ ] Verify build still works end-to-end from the bootstrapper umbrella.
+- [ ] Update bootstrapper's HANDOVER.md once the layout change ships.
+
+### Notes
+
+- **Why not monorepo?** scaffolder + surfacer are public with godot-3-era
+  Godot Asset Library entries (asset-lib-v0.7.0 branch preserved on each).
+  snore_core / surf_scaf / squirrel_away / bootstrapper are private. Mixed
+  visibility kills the monorepo option.
+- **Why bootstrapper stays the umbrella with submodules:** matches the
+  godot-cpp / godot-cpp-template ecosystem norm. Cloning bootstrapper
+  recursively gives a contributor everything they need.
+- **Workflow:** cd into bootstrapper, single editor window opens the
+  whole tree, edits to frameworks happen inline as siblings (e.g.
+  `cd submodules/scaffolder && edit && commit`), bump-pointer commits on
+  bootstrapper roll up across frameworks.
+
 ## Next (Phase 3 — finish the port, ship the framework)
 
 Order is flexible and depends on Phase 2 findings.
@@ -140,6 +209,13 @@ Order is flexible and depends on Phase 2 findings.
 - [ ] Investigate the `git submodule sync --recursive` no-op observed
   during the Phase 1 URL-fix (see HANDOVER.md decision #2). Worth
   understanding for future submodule URL changes.
+- [ ] **Fix failing GitHub Actions** across SnoringCat repos. Audit with
+  `gh run list --repo SnoringCatGames/<repo> --limit 5` for each of
+  bootstrapper, snore_core, scaffolder, surfacer, surf_scaf, squirrel_away.
+  Likely candidates given the rewrite churn: build workflows still set
+  up for Godot 3, paths referencing the now-archived `*2`-suffixed
+  repos, expired secrets, or workflows that need disabling entirely
+  while main is being slimmed.
 - [ ] Decide what to do with `.local-patches/godot-cpp-typed-array-debug.patch`
   long-term. Either upstream the `TypedArray<T>::debug()` helper to
   godot-cpp, or accept it as a permanent local-only patch.
