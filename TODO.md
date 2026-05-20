@@ -42,35 +42,28 @@ https://docs.godotengine.org/en/stable/tutorials/scripting/gdextension/gdextensi
 
 FIXME: LEFT OFF HERE: ---------------------------------------------------
 
-----
-DONE:
-- Logger
-- Utils
-- CircularBuffer
-- 
-----
+- Make sure play_sfx is being called for button clicks.
 
-- Search for and remove _ready()
-- Break-apart ScaffolderShell into two parts:
-  - One stays in GDScript and handles all the event handling.
-  - One stays in C++ and handles canvas layers.
-  - Rename the C++ version to CanvasLayersController.
-
-- Finish reviewing shell/canvas-layer classes.
-- Finish reviewing utils.
-- Finish reviewing logger.
-- Review circular buffer.
-- Review screen classes.
-- Review time classes.
-- Scan through all pending changes.
+- Get stuff compiling and running, then submit!
 
 - Finish porting Scaffolder to C++.
   - But leave some stuff in GDScript.
   - Review all of the initialization logic that was recently ported.
 
-- Get stuff compiling and running, then submit!
+- Review old Scaffolder GDScript and UI stuff.
+  - What to do with screens?
+
+- Update Godot shortcut for ctrl+shift+S.
+
+- Make sure logs include ticks since engine start (since ms aren't included in timestamps!).
 
 ----
+
+- Add diagrams to README files.
+- Add links to original sources:
+  - https://www.websequencediagrams.com/cgi-bin/cdraw?lz=dGl0bGUgU3VyZlNjYWYgSW5pdGlhbGl6YXRpb24KCm5vdGUgcmlnaHQgb2YgQ2xpZW50IEdhbWU6IHZhciBhbGxfc2V0dGluZ3MgPSB7XG4gIFNub3JlQ29yZU1haW5TABYHLAAVBWNhZmZvbGRlcgAJDnVyZmFjAAgNfQoAYAsgLT4ARw46AFoKLnNldF91cCgAfQwpCgoAdw0AJBwASgU6AD4HAIElFSkAOhMAgT8JADEZAIFZEQAzFACBcQcAdhkAggkPAIFEFACDBQ1hbGxfbW9kdWxlc18AghIGX2ZpbmlzaGVkLmVtaXQoKQoK&s=default
+  - https://miro.com/app/board/uXjVJV3LdkE=/
+
 
 - Expose geometry_constants to GDScript.
 - Add (and bind) log-recorded event to logger.
@@ -97,6 +90,11 @@ DONE:
 - Add a system for GDScript tests.
   - Add separate tests for each system to test bound APIs?
 
+- Remove godot as a submodule dependency (it's too huge, especially in nested submodules!).
+  - Instead, manually include it locally anyway, and add a .gitignore entry for it.
+  - Update vscode build rules to get it either from the system, or from the local path.
+    - Can I define an external project-local environment variable to define where godot is?
+  - Update github Actions build rules to get it elsewhere too...
 
 - DOCS:
   - Write some architecture documentation for SnoreCore.
@@ -106,7 +104,7 @@ DONE:
     - Module and settings classes
     - App registration process and lifecycle
     - Where tests get included
-    - Submit my launch and tasks VSCode Jason files in the repo, and reference them for build commands
+    - Submit my launch and tasks VSCode json files in the repo, and reference them for build commands
     - Also reference the GitHub Actions workflow file
     - SnoreCore is a separate DLL. It knows nothing about the other modules at compile time.
     - Surfacer and Scaffolder are also separate DLLs. They do depend on files from the SnoreCore DLL. But they do not know about each other.

@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<class name="TimeService" inherits="SnoreCoreSubmoduleWithNode" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/godotengine/godot/master/doc/class.xsd">
+	<brief_description>
+	</brief_description>
+	<description>
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="clear_debounce">
+			<return type="bool" />
+			<param index="0" name="debounced_callback" type="Callable" />
+			<description>
+			</description>
+		</method>
+		<method name="clear_interval">
+			<return type="bool" />
+			<param index="0" name="interval_id" type="int" />
+			<param index="1" name="triggers_interval" type="bool" default="false" />
+			<description>
+			</description>
+		</method>
+		<method name="clear_throttle">
+			<return type="bool" />
+			<param index="0" name="throttled_callback" type="Callable" />
+			<description>
+			</description>
+		</method>
+		<method name="clear_timeout">
+			<return type="bool" />
+			<param index="0" name="timeout_id" type="int" />
+			<param index="1" name="triggers_timeout" type="bool" default="false" />
+			<description>
+			</description>
+		</method>
+		<method name="clear_tween">
+			<return type="bool" />
+			<param index="0" name="tween_id" type="int" />
+			<param index="1" name="triggers_completed" type="bool" default="false" />
+			<description>
+			</description>
+		</method>
+		<method name="debounce">
+			<return type="Callable" />
+			<param index="0" name="callback" type="Callable" />
+			<param index="1" name="interval" type="float" />
+			<param index="2" name="invokes_at_start" type="bool" default="false" />
+			<param index="3" name="time_type" type="int" enum="TimeType" default="0" />
+			<description>
+			</description>
+		</method>
+		<method name="get_app_time" qualifiers="const">
+			<return type="float" />
+			<description>
+			</description>
+		</method>
+		<method name="get_clock_time" qualifiers="const">
+			<return type="float" />
+			<description>
+			</description>
+		</method>
+		<method name="get_combined_scale" qualifiers="const">
+			<return type="float" />
+			<description>
+			</description>
+		</method>
+		<method name="get_elapsed_time" qualifiers="const">
+			<return type="float" />
+			<param index="0" name="time_type" type="int" enum="TimeType" />
+			<description>
+			</description>
+		</method>
+		<method name="get_play_physics_frame_count" qualifiers="const">
+			<return type="int" />
+			<description>
+			</description>
+		</method>
+		<method name="get_play_time" qualifiers="const">
+			<return type="float" />
+			<description>
+			</description>
+		</method>
+		<method name="get_scaled_play_time" qualifiers="const">
+			<return type="float" />
+			<description>
+			</description>
+		</method>
+		<method name="get_scaled_time_step" qualifiers="const">
+			<return type="float" />
+			<description>
+			</description>
+		</method>
+		<method name="scale_delta" qualifiers="const">
+			<return type="float" />
+			<param index="0" name="duration" type="float" />
+			<description>
+			</description>
+		</method>
+		<method name="set_interval">
+			<return type="int" />
+			<param index="0" name="callback" type="Callable" />
+			<param index="1" name="period" type="float" />
+			<param index="2" name="arguments" type="Array" default="[]" />
+			<param index="3" name="time_type" type="int" enum="TimeType" default="0" />
+			<description>
+			</description>
+		</method>
+		<method name="set_timeout">
+			<return type="int" />
+			<param index="0" name="callback" type="Callable" />
+			<param index="1" name="delay" type="float" />
+			<param index="2" name="arguments" type="Array" default="[]" />
+			<param index="3" name="time_type" type="int" enum="TimeType" default="0" />
+			<description>
+			</description>
+		</method>
+		<method name="throttle">
+			<return type="Callable" />
+			<param index="0" name="callback" type="Callable" />
+			<param index="1" name="interval" type="float" />
+			<param index="2" name="invokes_at_end" type="bool" default="true" />
+			<param index="3" name="time_type" type="int" enum="TimeType" default="0" />
+			<description>
+			</description>
+		</method>
+		<method name="tween_method">
+			<return type="int" />
+			<param index="0" name="object" type="Object" />
+			<param index="1" name="key" type="StringName" />
+			<param index="2" name="initial_val" type="Variant" />
+			<param index="3" name="final_val" type="Variant" />
+			<param index="4" name="duration" type="float" />
+			<param index="5" name="ease_type" type="int" enum="EaseType" default="&quot;ease_in_out&quot;" />
+			<param index="6" name="delay" type="float" default="0.0" />
+			<param index="7" name="time_type" type="int" enum="TimeType" default="0" />
+			<param index="8" name="on_completed_callback" type="Callable" default="Callable()" />
+			<param index="9" name="arguments" type="Array" default="[]" />
+			<description>
+			</description>
+		</method>
+		<method name="tween_property">
+			<return type="int" />
+			<param index="0" name="object" type="Object" />
+			<param index="1" name="key" type="StringName" />
+			<param index="2" name="initial_val" type="Variant" />
+			<param index="3" name="final_val" type="Variant" />
+			<param index="4" name="duration" type="float" />
+			<param index="5" name="ease_type" type="int" enum="EaseType" default="&quot;ease_in_out&quot;" />
+			<param index="6" name="delay" type="float" default="0.0" />
+			<param index="7" name="time_type" type="int" enum="TimeType" default="0" />
+			<param index="8" name="on_completed_callback" type="Callable" default="Callable()" />
+			<param index="9" name="arguments" type="Array" default="[]" />
+			<description>
+			</description>
+		</method>
+	</methods>
+	<members>
+		<member name="additional_debug_time_scale" type="float" setter="set_additional_debug_time_scale" getter="get_additional_debug_time_scale" default="1.0">
+		</member>
+		<member name="time_scale" type="float" setter="set_time_scale" getter="get_time_scale" default="1.0">
+		</member>
+	</members>
+	<constants>
+		<constant name="physics_fps" value="60">
+		</constant>
+		<constant name="physics_time_step" value="0">
+		</constant>
+		<constant name="APP_PHYSICS" value="0" enum="TimeType">
+		</constant>
+		<constant name="APP_CLOCK" value="1" enum="TimeType">
+		</constant>
+		<constant name="APP_PHYSICS_SCALED" value="2" enum="TimeType">
+		</constant>
+		<constant name="APP_CLOCK_SCALED" value="3" enum="TimeType">
+		</constant>
+		<constant name="APP_PHYSICS_FRAME_COUNT" value="4" enum="TimeType">
+		</constant>
+		<constant name="APP_RENDER_FRAME_COUNT" value="5" enum="TimeType">
+		</constant>
+		<constant name="PLAY_PHYSICS" value="6" enum="TimeType">
+		</constant>
+		<constant name="PLAY_RENDER" value="7" enum="TimeType">
+		</constant>
+		<constant name="PLAY_PHYSICS_SCALED" value="8" enum="TimeType">
+		</constant>
+		<constant name="PLAY_RENDER_SCALED" value="9" enum="TimeType">
+		</constant>
+		<constant name="PLAY_PHYSICS_FRAME_COUNT" value="10" enum="TimeType">
+		</constant>
+		<constant name="PLAY_RENDER_FRAME_COUNT" value="11" enum="TimeType">
+		</constant>
+		<constant name="ELAPSED_PHYSICS_TIME" value="0" enum="ElapsedTimeType">
+		</constant>
+		<constant name="ELAPSED_PHYSICS_SCALED_TIME" value="1" enum="ElapsedTimeType">
+		</constant>
+		<constant name="ELAPSED_CLOCK_TIME" value="2" enum="ElapsedTimeType">
+		</constant>
+		<constant name="ELAPSED_CLOCK_SCALED_TIME" value="3" enum="ElapsedTimeType">
+		</constant>
+		<constant name="ELAPSED_RENDER_TIME" value="4" enum="ElapsedTimeType">
+		</constant>
+		<constant name="ELAPSED_RENDER_SCALED_TIME" value="5" enum="ElapsedTimeType">
+		</constant>
+		<constant name="PHYSICS_FRAME_COUNT" value="6" enum="ElapsedTimeType">
+		</constant>
+		<constant name="RENDER_FRAME_COUNT" value="7" enum="ElapsedTimeType">
+		</constant>
+	</constants>
+</class>

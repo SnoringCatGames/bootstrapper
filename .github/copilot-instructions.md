@@ -2,12 +2,14 @@
 - In C++, always prefix parameter names with 'p_'.
   - Don't prefix other parameter names with 'p_'.
 - In C++, group getters and setters together if they correspond to the same private field.
-- Prefer using `ENSURE` over `ERR_FAIL_COND_MSG`.
+- Prefer using `ENSURE` over `ERR_FAIL_COND_MSG` and `ENSURE_SIMPLE` over `ERR_FAIL_COND`.
 - Modify variables with the `const` keyword when possible.
 - Include periods after comments.
 - In C++, include one-line member function definitions in the header file.
-- Don't include trailing comments at the end of a line. Place those comments on their own preceding line instead.
-- When you leave comments about logic that you didn't finish implementing, annotate them with `// FIXME: LEFT OFF HERE: ...`.
+- For comments:
+  - Don't include trailing comments at the end of a line. Place those comments on their own preceding line instead.
+  - Don't include comments that don't add value beyond restating what should already be obvious from the corresponding variable or function names.
+  - When you leave comments about logic that you didn't finish implementing, annotate them with `// FIXME: LEFT OFF HERE: ...`.
 - Never include `using namespace ...` in a header file.
 - When possible, forward declare type dependencies in header files and only include them in the implementation files.
 - Never use the `auto` keyword.
@@ -21,6 +23,7 @@
   - For `.cpp` files and for test files, include the header file of the same name first and with an empty line separatating it from the rest of the includes.
 - For tests:
   - Prefix the filename with `test_`.
+  - Place test files in the same directory as the file they're testing.
   - Use `TEST` instead of `TEST_F` unless you need to set up a fixture.
   - Use `Test` as a suffix for the first argument to the `TEST` macro, and do not include the substring `Test` in the second argument.
     - Similarly, if using a fixture, use `Test` as a suffix for the fixture class name.
