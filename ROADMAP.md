@@ -401,19 +401,27 @@ Items in **bold** below were surfaced by the Phase 2.1 architecture review.
 
   Followups (not blocking, future improvements):
 
-  - [x] **Cache godot-cpp build artifacts (tier 1).** Done
-    2026-05-20. Each ci.yml caches `godot-cpp/bin`, `gen`,
-    `.sconsign.dblite`, and `src/**/*.os`. Cache key:
-    `godot-cpp-${runner.os}-gcc${gcc_version}-${godot_cpp_sha}-v1`,
-    with a restore-keys ladder so a SHA bump or branch shift still
-    reuses prior-OS-and-GCC cache (SCons does incremental rebuild
-    rather than full cold). Steady-state speedup expected ~7
-    min/run. The `-v1` suffix is the escape hatch — bump to `-v2`
-    to force-evict if cache poisoning is ever suspected.
-    Tier-2 (SCons object cache for framework code) deferred —
-    would need `env.CacheDir(...)` in `build_utils.py`, which is
-    a code change to the framework. Framework recompile is small
-    (~30-60s); tier-2 win is modest.
+  - [x] **Cache SCons compiled objects.** Done 2026-05-20. Each
+    ci.yml sets `SCONS_CACHE=$GITHUB_WORKSPACE/.scons-cache` and
+    `actions/cache@v4`s that directory. godot-cpp's SConstruct
+    natively reads `SCONS_CACHE` and calls `CacheDir(...)` +
+    `Decider("MD5")`, giving content-addressed caching of every
+    compile output. The framework's SConstruct inherits the same
+    env, so framework objects get cached too (no `build_utils.py`
+    code change needed — turns out the "tier-2 framework cache"
+    falls out for free).
+    Cache key: `scons-v3-${runner.os}-gcc${gcc_version}-${godot_cpp_sha}-${github.sha}`,
+    with a 3-step restore-keys ladder. The `v3-` prefix is the
+    manual escape hatch (bump to v4 to force-evict; v1 and v2
+    were earlier broken iterations that cached the wrong paths).
+    **Measured speedup:** cold 10 min 32 sec → warm 9 sec
+    (validated on snore_core). The 6-repo nightly steady-state
+    cost dropped from ~60 min to ~1.5-4 min depending on what
+    changed.
+    Worth knowing: SCons cache saves the final shared library
+    too, not just intermediates — a warm "rebuild" of an
+    unchanged source tree is literally "Retrieved
+    libSnoreCore.*.so from cache" in ~150 ms.
   - [ ] Add actual test running. Today the workflow only builds; it
     doesn't launch Godot against the demo project to run the gtest
     suite. Doing so cleanly needs a pre-built Godot binary (don't
