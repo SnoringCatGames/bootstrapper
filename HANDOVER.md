@@ -2,8 +2,11 @@
 
 Snapshot of where the SnoringCat Godot rewrite is at the time of writing.
 Phase 1 (repo surgery), Phase 2 (code review + audit + context refresh),
-and Phase 2.5 (workspace-sibling refactor) are all complete. Phase 3
-(finish the port) is the next active work.
+and Phase 2.5 (workspace-sibling refactor) are all complete. The CI
+rewrite housekeeping item is also done (2026-05-20) — every repo now
+has a working `.github/workflows/ci.yml` that builds on Linux/GCC
+against the workspace-sibling layout. Phase 3 (finish the port) is the
+next active work.
 
 The original full plan, including the pre-execution research and rationale,
 is at `C:\Users\lsl\.claude\plans\spicy-splashing-shamir.md` on this

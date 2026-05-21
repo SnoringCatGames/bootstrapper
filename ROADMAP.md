@@ -366,19 +366,56 @@ Items in **bold** below were surfaced by the Phase 2.1 architecture review.
   predated the current bootstrapper project by ~4 years and wasn't
   referenced anywhere in the active codebase). Done 2026-05-20 via
   `gh repo archive`.
-- [ ] **Audit + rewrite the GitHub Actions across all six SnoringCat
-  repos** (snore_core, scaffolder, surfacer, surf_scaf, squirrel_away,
-  bootstrapper). Auto-triggers on `tests.yml` were disabled 2026-05-20
-  (set to `workflow_dispatch:` only) as a stop-gap because every push
-  was failing — the workflows still expect the old nested-submodule
-  layout (`./godot-cpp`, `./godot`, `./submodules/*`), which Phase 2.5
-  replaced with workspace siblings that CI's `actions/checkout`
-  doesn't fetch. Beyond that surface fix, the existing workflow files
-  are heavily LLM-generated and likely need a from-scratch rewrite:
-  step ordering, caching, secrets, and test runner contracts should
-  all be re-derived. Heavy-handed rewriting is acceptable. Re-enable
-  push/PR auto-triggers as part of the rewrite. `builds.yml` is
-  already `workflow_dispatch`-only so it didn't need the stop-gap.
+- [x] **Audit + rewrite the GitHub Actions across all six SnoringCat
+  repos.** Done 2026-05-20. Each repo's two LLM-generated workflows
+  (`builds.yml` + `tests.yml`, ~640 lines combined per repo with a
+  multi-platform release matrix that nothing consumed) were replaced
+  with a single `ci.yml` (~70-110 lines per repo). The new workflow:
+  triggers on `push` / `pull_request` to `dev` / `main` / `master`
+  plus `workflow_dispatch`; runs on `ubuntu-latest`; checks out the
+  full workspace-sibling layout (frameworks + godot-cpp@4.4 +
+  googletest) into the runner workspace root; builds via
+  `scons sc_ci=yes sc_dev=yes sc_tests=yes`. The `sc_ci=yes` flag is
+  important — `debug_utils.h`'s `DEBUG_BREAK` macro otherwise expands
+  to `__builtin_debugtrap` (Clang/MSVC-only) which GCC rejects. The
+  dead `.github/actions/sign/` Mac-signing action was deleted from
+  every repo. Followups inline below.
+
+  Surfaced bugs in the framework (fixed during the rewrite, since the
+  new Linux/GCC CI is stricter than the local Windows/MSVC build):
+
+  - snore_core `log_service.cpp`: ternary returning
+    `Vector2` vs `Vector2i` (different types).
+  - snore_core `snore_core_main_module.cpp`: `Node.hpp` include with
+    wrong case (worked on NTFS, fails on ext4).
+  - snore_core `snore_core_root_module.h::set_up_base`: non-const
+    `Ref<>&` parameter rejected when bound to an rvalue.
+  - scaffolder `scaffolder_module.h`: `Ref<GameSession> session`
+    member with only a forward declaration — Ref<> destructor
+    instantiation needs the complete type.
+  - scaffolder `scaffolder_module.cpp`: two ternaries returning
+    `Ref<PackedScene>` vs `Ref<Resource>`.
+
+  Followups (not blocking, future improvements):
+
+  - [ ] Add SCons cache via `actions/cache@v4` keyed on platform +
+    arch. Each CI run currently rebuilds godot-cpp from source
+    (~5-6 min of the ~9 min total). With cache, after the first
+    run most builds drop to ~2-3 min.
+  - [ ] Add actual test running. Today the workflow only builds; it
+    doesn't launch Godot against the demo project to run the gtest
+    suite. Doing so cleanly needs a pre-built Godot binary (don't
+    rebuild from source in CI). The simplest path is downloading
+    a Godot 4 stable release via the godotengine.org URL into a
+    workspace `godot/bin/` and pointing the demo at it.
+  - [ ] Opt the `actions/checkout@v4` step into Node 24 to silence
+    the deprecation warning, or wait until June 2026 when the
+    runner switches the default.
+  - [ ] Move the per-repo `PRIVATECHECKOUTACCESSTOKEN` secrets to an
+    organization-level secret so token rotation is a single
+    operation (today a fresh PAT must be set on each of 4 private
+    repos). Was discovered during the rewrite because surf_scaf's
+    per-repo PAT was stale and broke its CI's snore_core checkout.
 - [x] **Decide what to do with `.local-patches/`** — kept as permanent
   local insurance (decision 2026-05-20). Background: the patch adds a
   `TypedArray<T>::debug()` helper to godot-cpp so MSVC can inspect

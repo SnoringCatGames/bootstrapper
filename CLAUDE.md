@@ -176,12 +176,40 @@ replaces that.
 
 ## GitHub Actions
 
-Workflows live in each repo's `.github/workflows/` on `dev` (and
-historically on the default branch — they've been removed from the
-slim default branches during the rewrite). Several are known to fail
-right now (Godot 3 era assumptions, references to the archived
-`*2`-suffixed URLs, etc.). The audit + fix is on the roadmap.
-**Don't be alarmed by red CI** during the rewrite.
+Each of the six SnoringCat repos has a single `.github/workflows/ci.yml`
+(rewritten 2026-05-20; see ROADMAP housekeeping). The workflow:
+
+- Triggers on `push` / `pull_request` to `dev` / `main` / `master`,
+  plus `workflow_dispatch` for manual runs.
+- Runs on `ubuntu-latest`. Single platform / arch / target for now
+  (Linux x86_64 debug). The multi-platform matrix is deliberately
+  not part of the rewrite — add back selectively when there's a real
+  consumer.
+- Reconstructs the workspace-sibling layout in the runner by
+  checking out each required sibling into the workspace root (the
+  current repo at `<this>/`, frameworks at `<sibling>/`, godot-cpp
+  at `godot-cpp/`, googletest at `googletest/`). Each framework's
+  build_utils.py expects `../<dep>/` paths; this layout makes them
+  resolve.
+- Builds via `scons sc_ci=yes sc_dev=yes sc_tests=yes`. The
+  `sc_ci=yes` flag is essential — `debug_utils.h`'s `DEBUG_BREAK`
+  macro otherwise expands to `__builtin_debugtrap`, which is
+  Clang/MSVC-only (the runner uses GCC).
+
+Private-repo cross-checkout uses the per-repo
+`PRIVATECHECKOUTACCESSTOKEN` secret (a fine-grained PAT with
+read-only Contents access to the 4 private SnoringCat repos:
+snore_core, surf_scaf, squirrel_away, bootstrapper). The PAT is
+set independently on each repo that needs it — there's no
+org-level secret today. **Rotating the PAT is a per-repo
+operation**, so prefer creating one token with access to all
+4 repos and setting it on each. A followup in ROADMAP tracks
+migrating to an org-level secret.
+
+The workflow does NOT run tests (the gtest suite lives in the demo
+project and needs a Godot binary). Build-only CI catches
+compilation regressions, which is what most matters during the
+rewrite. The "add real test running" followup is in ROADMAP.
 
 ## Commit / push conventions
 
