@@ -94,44 +94,53 @@ docs — the default-branch view will fill in over time.
 ## Build system
 
 - **SCons** is the build tool. Each framework has its own `SConstruct`
-  that invokes shared helpers in `submodules/snore_core/build_utils.py`.
+  that invokes shared helpers in `snore_core/build_utils.py` (a
+  workspace sibling, post-Phase 2.5).
 - Build flags: `sc_dev`, `sc_tests`, `sc_ci`, `sc_zip`. `sc_tests=yes`
   defines `SC_TESTS_ENABLED` and pulls in googletest sources.
 - **Static linking** is the model — each downstream framework compiles
   its upstream sources into its own binary (so `scaffolder.so` contains
   snore_core's compiled code, etc.). No runtime cross-extension DLL
   deps.
-- Bootstrapper's `demo/` project loads only `surf_scaf.gdextension`.
-  Bootstrapper's `SConstruct` itself rebuilds the surf_scaf bundle into
-  `demo/addons/surf_scaf/bin/` rather than reusing `submodules/surf_scaf/
-  addon/bin/`, so building bootstrapper produces a second copy of the
-  same binary. Building surf_scaf standalone first is unnecessary if you
-  only need the demo. Phase 2.5 (workspace siblings) is the right place
-  to collapse this duplication.
+- Bootstrapper's `demo/` project loads only `surf_scaf.gdextension`,
+  and bootstrapper's `SConstruct` does **not** compile anything — it
+  just refreshes the demo's `addons/` tree with symlinks: per-framework
+  GDScript symlinks into each `addon/`, plus a single directory symlink
+  for `demo/addons/surf_scaf/bin/` → `../surf_scaf/addon/bin/`. The
+  shared library is built by surf_scaf's own SConstruct. Workflow:
 
-### Double-registration risk
+  ```
+  cd ~/Repositories/surf_scaf && scons sc_dev=yes sc_tests=yes
+  cd ~/Repositories/bootstrapper && scons   # refresh symlinks
+  ```
 
-The repo carries four `.gdextension` manifests in source —
-`snore_core.gdextension`, `scaffolder.gdextension`, `surfacer.gdextension`,
-`surf_scaf.gdextension`. Only `surf_scaf.gdextension` is loaded by the
-demo today, and that is the supported configuration. **If a downstream
-project ever loads two of these manifests at once** (e.g., `surf_scaf` +
-`scaffolder`), both entry points will call their statically-linked copy of
-`SnoreCore::register_gdextension_types`, and Godot's `ClassDB::register_
-class<>` will abort on the duplicate. There is no runtime guard. Safest
-fix is to delete the three redundant manifests on `dev`; alternative is a
-`static bool registered;` guard in each namespaced
-`register_gdextension_types`.
+  Once the symlinks are in place, future surf_scaf rebuilds are
+  visible through the symlink without re-running bootstrapper's scons.
 
-### Test source wiring caveat
+### Double-registration risk (mitigated 2026-05-20)
 
-`set_up()` in `submodules/snore_core/build_utils.py` gates googletest
-source inclusion on `env["includes_tests"]` only — independent from
-`env["includes_dev"]`. That means `sc_tests=yes sc_dev=no` ships gtest
-source into a release-mode artifact. The CPP defines (`SC_TESTS_ENABLED`,
-`SC_DEV_ENABLED`) are independent flags, but source inclusion shouldn't
-be. If you add a CI invocation that runs tests in release mode, gate
-those source files on `includes_dev AND includes_tests` first.
+Originally the framework carried four `.gdextension` manifests in source
+— `snore_core.gdextension`, `scaffolder.gdextension`,
+`surfacer.gdextension`, `surf_scaf.gdextension`. Only
+`surf_scaf.gdextension` is loaded by the demo, and that is the supported
+configuration. If a downstream project loaded two of these at once, both
+entry points would call their statically-linked copy of
+`SnoreCore::register_gdextension_types`, and Godot's
+`ClassDB::register_class<>` would abort on the duplicate.
+
+The three standalone manifests (snore_core / scaffolder / surfacer) were
+deleted on 2026-05-20 to close this hole; each framework's README now
+documents `surf_scaf` as the supported loading path. The only manifest
+shipped is `surf_scaf/addon/bin/surf_scaf.gdextension`.
+
+### Test source wiring (fixed 2026-05-20)
+
+`set_up()` in `snore_core/build_utils.py` gates googletest source
+inclusion on `env["includes_dev"] AND env["includes_tests"]`. Earlier
+the gate was `includes_tests` alone, which would have shipped gtest
+source into a release-mode artifact via `sc_tests=yes sc_dev=no`.
+Fixed during the Phase 2.5 workspace-sibling refactor; if you ever
+loosen this gate again, prefer keeping the AND.
 
 ## Repository layout
 

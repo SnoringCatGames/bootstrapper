@@ -88,10 +88,13 @@ Scratch clones used during the swap live at `C:\tmp\surgery\` and
   - `godot-cpp-local_dev_template_instantiations.cpp` — the untracked
     companion file that forces template instantiation.
   Both are third-party (godot-cpp) edits that must NOT be pushed
-  upstream. The patches are a safety net; the working tree in
-  `submodules/godot-cpp/` is still dirty with the live versions and will
-  survive normal git operations as long as nothing runs `git restore`
-  or `git checkout` inside the godot-cpp submodule.
+  upstream. They are also applied directly to `~/Repositories/godot-
+  cpp/` so the live build sees them. The `.local-patches/` directory
+  is the **permanent re-apply source** if godot-cpp ever needs a
+  clean reclone (new machine, accidental `git restore`, branch
+  switch). Kept by design — see ROADMAP housekeeping for the
+  rationale (web research found no better alternative for inspecting
+  godot-cpp's opaque `TypedArray` contents from a breakpoint).
 - **`submodules/snore_core/src/snore_core/test_snore_core_root_module.cpp`**
   — empty stub file, untracked. Left alone; either `git rm` or fill in.
 - **Submodule-pointer drift inside `surf_scaf` and `squirrel_away`**
@@ -101,13 +104,15 @@ Scratch clones used during the swap live at `C:\tmp\surgery\` and
 ## Phase 2 findings summary (2026-05-19)
 
 **2.1 — GDExtension architecture review:** The static-link/chain-register
-pattern is sound and matches the Godot-4 constraint. Key risks landed in
-CLAUDE.md (build system section): (a) double-registration if any project
-loads more than one of the four in-source `.gdextension` manifests; (b)
-googletest source inclusion is gated on `sc_tests` alone, so release
-builds with tests on ship gtest in the binary; (c) bootstrapper rebuilds
-surf_scaf into its own bin/ rather than reusing — duplicate build work.
-Concrete action items moved to ROADMAP housekeeping.
+pattern is sound and matches the Godot-4 constraint. Three risks were
+flagged and all three are now resolved: (a) double-registration if any
+project loaded more than one of the four in-source `.gdextension`
+manifests — fixed 2026-05-20 by deleting the three redundant manifests;
+(b) googletest source inclusion was gated on `sc_tests` alone, so
+release builds with tests on would ship gtest in the binary — fixed
+during Phase 2.5; (c) bootstrapper rebuilt surf_scaf into its own bin/
+rather than reusing — fixed 2026-05-20 by switching bootstrapper to
+Option B (symlink the surf_scaf artifact instead of rebuilding it).
 
 **2.2 — Port audit:** This is a restructure, not a 1:1 translation, so
 the "diff godot3:foo vs master:foo" exercise wasn't useful. Coverage
@@ -128,11 +133,18 @@ it already flags the WIP nature.
    level_button/select, accordions, radial_menus, notifications, camera +
    character framework, plugger) *intentionally dropped* or *deferred to
    Phase 3*? CLAUDE.md should be updated either way.
-2. Is bootstrapper rebuilding surf_scaf intentional, or should bootstrapper
-   become "no-build, just consume surf_scaf's prebuilt artifact"? Phase 2.5
-   would naturally collapse this.
-3. Standalone-loadable `scaffolder.gdextension` — ever a real use case (e.g.,
-   Asset Library), or safe to delete?
+
+**Decisions resolved 2026-05-20:**
+
+2. Is bootstrapper rebuilding surf_scaf intentional? **No** — switched
+   to Option B (symlink). Bootstrapper's SConstruct does not compile
+   anything; it just refreshes the demo's `addons/` tree, including a
+   directory symlink `demo/addons/surf_scaf/bin/` → `../surf_scaf/addon/
+   bin/`. surf_scaf's own SConstruct is the single source of the
+   artifact.
+3. Standalone-loadable `scaffolder.gdextension` (and surfacer / snore_core
+   equivalents) — **deleted.** None of them were real use cases; surf_scaf
+   is the only supported loading path.
 
 ## Phase 2.5 summary (2026-05-20)
 
@@ -170,16 +182,21 @@ Local cleanup that landed alongside:
 
 What still needs the user's attention (one-time):
 
-1. **Move bootstrapper's `.local-patches/` decision.** The patch + the
-   template-instantiations source file have been applied to
-   `~/Repositories/godot-cpp/` so the build works from siblings.
-   `.local-patches/` itself still sits at bootstrapper's repo root,
-   untracked. Decide whether to keep it as a re-apply source or remove
-   it now that godot-cpp carries the changes directly.
-2. **Build verify on 2026-05-20 — PASS.** `scons sc_dev=yes sc_tests=yes`
-   from `~/Repositories/bootstrapper/` now builds end-to-end and links
-   `demo/addons/surf_scaf/bin/windows/SurfScaf.windows.template_debug.x86_64.dll`.
-   First pass exposed a pre-existing compile error
+1. **`.local-patches/` decision — RESOLVED 2026-05-20.** Keep the
+   directory as permanent re-apply insurance for godot-cpp. The
+   `TypedArray<T>::debug()` helper it documents has no good
+   alternative for inspecting opaque godot-cpp containers at a
+   breakpoint (researched 2026-05-20; Godot's `godot.natvis` doesn't
+   cover godot-cpp's opaque-pointer wrappers, and the proposal to
+   ship a godot-cpp natvis was closed not-planned). See ROADMAP
+   housekeeping for the full rationale.
+2. **Build verify on 2026-05-20 — PASS.** End-to-end build works under
+   the post-Option-B flow:
+   `cd ~/Repositories/surf_scaf && scons sc_dev=yes sc_tests=yes` builds
+   `surf_scaf/addon/bin/windows/SurfScaf.windows.template_debug.x86_64.dll`,
+   then `cd ~/Repositories/bootstrapper && scons` refreshes
+   `demo/addons/surf_scaf/bin/` as a directory symlink to the surf_scaf
+   artifact. First pass exposed a pre-existing compile error
    (`std::unordered_map<StringName, ...>` couldn't instantiate because
    godot-cpp 4.4 dropped its internal `std::unordered_map` use and so
    no longer transitively provides a `std::hash<godot::StringName>`).
@@ -245,7 +262,12 @@ ls ..                                          # expect siblings: snore_core,
                                                # scaffolder, surfacer,
                                                # surf_scaf, squirrel_away,
                                                # godot-cpp, godot, googletest
-scons sc_dev=yes sc_tests=yes                  # full build
+# Build the bundle in surf_scaf (this compiles all framework sources):
+cd ..\surf_scaf
+scons sc_dev=yes sc_tests=yes
+# Refresh bootstrapper's demo symlinks (no compile, just symlinks):
+cd ..\bootstrapper
+scons
 ```
 
 Then jump to Phase 3 (port + framework work) in ROADMAP.md.

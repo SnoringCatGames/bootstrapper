@@ -338,11 +338,13 @@ Items in **bold** below were surfaced by the Phase 2.1 architecture review.
   `godot-proposals#13997` (the engine proposal for cross-extension class
   inheritance; gdext#615 is the rust-bindings tracker). Updated in
   surf_scaf, scaffolder, and surfacer. Done 2026-05-20.
-- [ ] **Decide bootstrapper's relationship to surf_scaf's artifact**.
-  Today bootstrapper rebuilds the surf_scaf bundle into
-  `demo/addons/surf_scaf/bin/` from scratch. Options: keep duplicating,
-  symlink surf_scaf's bin/, or fold the demo into surf_scaf itself.
-  Likely resolved by Phase 2.5.
+- [x] **Decide bootstrapper's relationship to surf_scaf's artifact**:
+  symlink (Option B). Bootstrapper's SConstruct no longer compiles
+  anything; it just refreshes the demo's `addons/` tree, with
+  `demo/addons/surf_scaf/bin/` symlinked as a directory to
+  `../surf_scaf/addon/bin/`. Single source of truth for the artifact.
+  Workflow: `cd surf_scaf && scons sc_dev=yes` builds the bundle, then
+  bootstrapper's scons refreshes symlinks. Done 2026-05-20.
 - [x] Rename local working directory
   `C:\Users\lsl\Repositories\bootstrapper2\` → `bootstrapper\`. Done
   2026-05-20.
@@ -366,9 +368,21 @@ Items in **bold** below were surfaced by the Phase 2.1 architecture review.
   all be re-derived. Heavy-handed rewriting is acceptable. Re-enable
   push/PR auto-triggers as part of the rewrite. `builds.yml` is
   already `workflow_dispatch`-only so it didn't need the stop-gap.
-- [ ] Decide what to do with `.local-patches/godot-cpp-typed-array-debug.patch`
-  long-term. Either upstream the `TypedArray<T>::debug()` helper to
-  godot-cpp, or accept it as a permanent local-only patch.
+- [x] **Decide what to do with `.local-patches/`** — kept as permanent
+  local insurance (decision 2026-05-20). Background: the patch adds a
+  `TypedArray<T>::debug()` helper to godot-cpp so MSVC can inspect
+  array contents at a breakpoint. Web research (2026-05-20) found no
+  better alternative: Godot's engine `godot.natvis` covers Variant /
+  Array / String, but Godot-cpp's `Array` and `TypedArray<T>` are
+  opaque-pointer wrappers whose internal layout doesn't match what the
+  engine's natvis dereferences. A custom natvis for godot-cpp's
+  opaque types is theoretically possible (`reinterpret_cast<void**>
+  (opaque)` style, like `godot::String` in the engine natvis) but
+  would be non-trivial to write and maintain. godot-proposals#10605
+  (ship natvis in godot-cpp) was closed as not-planned. Forum
+  consensus: no good answer. The patches stay as the pragmatic
+  approach. Future option: write the custom natvis for godot-cpp
+  opaque types as a one-time investment.
 
 ## Out of scope
 
