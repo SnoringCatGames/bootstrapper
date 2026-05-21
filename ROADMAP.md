@@ -269,15 +269,29 @@ boundary.
 
 ## Next (Phase 3 — finish the port, ship the framework)
 
-Order is flexible and depends on Phase 2 findings.
+**Priority direction (set 2026-05-20):** finish every *other* port and
+all cleanup / polishing of the known framework bits **before** taking
+on any additional surfacer porting work. Surfacer is the biggest
+remaining lift; it lands last.
 
-- [ ] Finish surfacer GDScript → C++ port (acknowledged as the biggest
-  remaining lift).
-- [ ] Land any specific port bugs surfaced by the Phase 2.2 audit.
+- [ ] Port the missing scaffolder systems flagged by Phase 2.2:
+  annotators, color_config, level_button/select, accordions,
+  radial_menus, notifications, camera + character framework, plugger.
+  Some may be intentionally dropped — decide per-system.
+- [ ] Build out squirrel_away game logic. Currently empty (no .gd or
+  .cpp in `src/` or `addon/src/` on dev). Re-port from the godot3
+  branch, adapted to the new framework signatures.
+- [ ] App/framework setup improvements. Specifics TBD; revisit after
+  the scaffolder/squirrel_away porting passes make the current state
+  legible.
+- [ ] Land any port bugs surfaced during the above work (functional
+  diffs vs the godot3 branch).
 - [ ] Resolve architectural recommendations from Phase 2.1 (e.g.,
-  registration idempotency guard if needed).
-- [ ] App/framework setup improvements (specifics TBD; revisit after
-  Phase 2 makes the current state legible).
+  registration idempotency guard if needed) inline with the work
+  above.
+- [ ] **Then, finally:** finish surfacer GDScript → C++ port. The
+  surface-graph foundation is in place; edge/movement calculators
+  and pathfinding are not.
 
 ## Later (Phase 4 — new features)
 
@@ -329,15 +343,16 @@ Items in **bold** below were surfaced by the Phase 2.1 architecture review.
   `demo/addons/surf_scaf/bin/` from scratch. Options: keep duplicating,
   symlink surf_scaf's bin/, or fold the demo into surf_scaf itself.
   Likely resolved by Phase 2.5.
-- [ ] Rename local working directory
-  `C:\Users\lsl\Repositories\bootstrapper2\` → `bootstrapper\`. Cosmetic.
-  Close Godot + IDEs first.
-- [ ] Delete `C:\tmp\sc-backup\*.git` mirrors after ~2026-05-26 if no
-  rollback was needed.
-- [ ] Decide fate of `scaffolder-bootstrap` repo. Last commit
-  2021-12-13; not archived. Predates the current bootstrapper project
-  by ~4 years and isn't referenced anywhere in the active codebase.
-  Likely safe to archive.
+- [x] Rename local working directory
+  `C:\Users\lsl\Repositories\bootstrapper2\` → `bootstrapper\`. Done
+  2026-05-20.
+- [ ] Delete `C:\tmp\sc-backup\*.git` mirrors after ~2026-06-19 if no
+  rollback was needed (one month from Phase 1 surgery completion;
+  pushed out from the original 2026-05-26 per user direction).
+- [x] Archive `scaffolder-bootstrap` repo (last commit 2021-12-13;
+  predated the current bootstrapper project by ~4 years and wasn't
+  referenced anywhere in the active codebase). Done 2026-05-20 via
+  `gh repo archive`.
 - [ ] **Audit + rewrite the GitHub Actions across all six SnoringCat
   repos** (snore_core, scaffolder, surfacer, surf_scaf, squirrel_away,
   bootstrapper). Auto-triggers on `tests.yml` were disabled 2026-05-20

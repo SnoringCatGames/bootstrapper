@@ -12,8 +12,8 @@ machine. This file is the durable, in-project copy of the handover.
 ## What was done (2026-05-19)
 
 **Phase 1 — repo surgery — COMPLETE.** All branches/URLs/archives are in
-their final state on GitHub. The local working directory is still
-`C:\Users\lsl\Repositories\bootstrapper2\` (cosmetic — see "Known followups").
+their final state on GitHub. The local working directory was renamed
+`bootstrapper2\` → `bootstrapper\` on 2026-05-20.
 
 End state on GitHub (`gh repo list SnoringCatGames`):
 
@@ -177,7 +177,7 @@ What still needs the user's attention (one-time):
    untracked. Decide whether to keep it as a re-apply source or remove
    it now that godot-cpp carries the changes directly.
 2. **Build verify on 2026-05-20 — PASS.** `scons sc_dev=yes sc_tests=yes`
-   from `~/Repositories/bootstrapper2/` now builds end-to-end and links
+   from `~/Repositories/bootstrapper/` now builds end-to-end and links
    `demo/addons/surf_scaf/bin/windows/SurfScaf.windows.template_debug.x86_64.dll`.
    First pass exposed a pre-existing compile error
    (`std::unordered_map<StringName, ...>` couldn't instantiate because
@@ -188,8 +188,8 @@ What still needs the user's attention (one-time):
    `StringName::hash()`, and including it from the six affected
    headers in snore_core (4) and scaffolder (2). The idiomatic
    `godot::HashMap`-based fix is tracked in ROADMAP housekeeping.
-3. **Rename the local dir** `bootstrapper2/` → `bootstrapper/`. Still
-   cosmetic and still pending.
+3. **Rename the local dir** `bootstrapper2/` → `bootstrapper/` — DONE
+   2026-05-20.
 
 ### Housekeeping completed during 2026-05-20
 
@@ -219,13 +219,18 @@ is tracked in [ROADMAP.md](ROADMAP.md).
 
 Top items at the time of writing:
 
-1. **Phase 3 — finish the port.** Scaffolder/surfacer port gaps from
-   Phase 2.2 audit; squirrel_away game logic; framework setup
-   improvements.
-2. Rename local working directory `bootstrapper2\` → `bootstrapper\`
-   (cosmetic; close Godot + IDEs first).
-3. Delete `C:\tmp\sc-backup\*.git` mirrors after ~2026-05-26.
-4. Eventually swap `std::unordered_map<StringName, ...>` for
+1. **Phase 3 — finish the port.** Priority order per user direction
+   2026-05-20: finish every *other* port and complete the cleanup /
+   polishing of all known framework bits **before** porting any
+   additional surfacer logic. That means: missing scaffolder systems
+   (annotators, color_config, level_button/select, accordions,
+   radial_menus, notifications, camera + character framework,
+   plugger), squirrel_away game logic (currently empty), framework
+   setup improvements, and any open port-bug followups from Phase 2.2.
+   Surfacer's remaining GDScript → C++ port is the last step.
+2. Delete `C:\tmp\sc-backup\*.git` mirrors after ~2026-06-19 (one
+   month after the Phase 1 surgery completion).
+3. Eventually swap `std::unordered_map<StringName, ...>` for
    `godot::HashMap` and drop `snore_core/internal/std_hash.h`. Tracked
    under ROADMAP housekeeping. Not urgent — the std_hash.h workaround
    lets the build pass cleanly today.
@@ -233,7 +238,7 @@ Top items at the time of writing:
 ## Quick-start for the next session
 
 ```pwsh
-cd C:\Users\lsl\Repositories\bootstrapper2   # (or `bootstrapper` if renamed)
+cd C:\Users\lsl\Repositories\bootstrapper
 git status --short                            # expect: clean
 git remote -v                                 # expect: origin=bootstrapper.git
 ls ..                                          # expect siblings: snore_core,
