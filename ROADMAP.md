@@ -332,29 +332,28 @@ Items in **bold** below were surfaced by the Phase 2.1 architecture review.
 - [ ] Rename local working directory
   `C:\Users\lsl\Repositories\bootstrapper2\` → `bootstrapper\`. Cosmetic.
   Close Godot + IDEs first.
-- [ ] Resolve in-flight submodule pointer drift on `dev` (the lowercase-m
-  entries inside `surf_scaf` and `squirrel_away`). When the dev-branch
-  porting work is at a checkpoint, land a "Bump submodule pointers"
-  commit.
 - [ ] Delete `C:\tmp\sc-backup\*.git` mirrors after ~2026-05-26 if no
   rollback was needed.
-- [ ] Decide fate of `scaffolder-bootstrap` repo (shows up in the org
-  list but wasn't part of the recent surgery; possibly obsolete).
-- [ ] Investigate the `git submodule sync --recursive` no-op observed
-  during the Phase 1 URL-fix (see HANDOVER.md decision #2). Worth
-  understanding for future submodule URL changes.
-- [ ] **Fix failing GitHub Actions** across SnoringCat repos. Audit with
-  `gh run list --repo SnoringCatGames/<repo> --limit 5` for each of
-  bootstrapper, snore_core, scaffolder, surfacer, surf_scaf, squirrel_away.
-  Likely candidates given the rewrite churn: build workflows still set
-  up for Godot 3, paths referencing the now-archived `*2`-suffixed
-  repos, expired secrets, or workflows that need disabling entirely
-  while main is being slimmed.
+- [ ] Decide fate of `scaffolder-bootstrap` repo. Last commit
+  2021-12-13; not archived. Predates the current bootstrapper project
+  by ~4 years and isn't referenced anywhere in the active codebase.
+  Likely safe to archive.
+- [ ] **Audit + rewrite the GitHub Actions across all six SnoringCat
+  repos** (snore_core, scaffolder, surfacer, surf_scaf, squirrel_away,
+  bootstrapper). Auto-triggers on `tests.yml` were disabled 2026-05-20
+  (set to `workflow_dispatch:` only) as a stop-gap because every push
+  was failing — the workflows still expect the old nested-submodule
+  layout (`./godot-cpp`, `./godot`, `./submodules/*`), which Phase 2.5
+  replaced with workspace siblings that CI's `actions/checkout`
+  doesn't fetch. Beyond that surface fix, the existing workflow files
+  are heavily LLM-generated and likely need a from-scratch rewrite:
+  step ordering, caching, secrets, and test runner contracts should
+  all be re-derived. Heavy-handed rewriting is acceptable. Re-enable
+  push/PR auto-triggers as part of the rewrite. `builds.yml` is
+  already `workflow_dispatch`-only so it didn't need the stop-gap.
 - [ ] Decide what to do with `.local-patches/godot-cpp-typed-array-debug.patch`
   long-term. Either upstream the `TypedArray<T>::debug()` helper to
   godot-cpp, or accept it as a permanent local-only patch.
-- [ ] Empty file `submodules/snore_core/src/snore_core/test_snore_core_root_module.cpp`
-  — `git rm` or fill in.
 
 ## Out of scope
 
