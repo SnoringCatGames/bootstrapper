@@ -282,10 +282,26 @@ scaffolder surface is effectively final for the rewrite, modulo
 polish and bug fixes. Revisit if a squirrel_away port reveals a
 genuine missing dependency.
 
+- [ ] **Demo cleanup so CI tests can run.** Surfaced 2026-05-21
+  while trying to add headless test runs in surf_scaf's CI. The
+  demo project's scaffolder autoload `addon/src/core/s.gd`
+  declares typed variables referencing already-dropped systems
+  (`LoggersDisplay`, `ScaffolderGameScreen`,
+  `ScaffolderSettingsOld`). Its parse fails at autoload time —
+  before GDExtension class registration finishes — and cascades
+  into every downstream script. Works locally because the editor's
+  interactive load sequence is more permissive than
+  `--headless --quit`. Needs: drop or stub the references to
+  removed types in `s.gd`; fix the surf_scaf demo's
+  `settings.tres` files to not reference removed scenes (HUD,
+  super_hud); confirm `godot --headless --quit --path ./demo`
+  exits cleanly and reaches `SnoreCore.run_tests()`. Once green,
+  re-add the test-run step to surf_scaf's ci.yml (see prior commit
+  history on dev — the step was reverted but the design is
+  worked out).
 - [ ] Build out squirrel_away game logic. Currently empty (no .gd or
   .cpp in `src/` or `addon/src/` on dev). Re-port from the godot3
-  branch, adapted to the new framework signatures. **This is the
-  first Phase 3 task.**
+  branch, adapted to the new framework signatures.
 - [ ] App/framework setup improvements. Specifics TBD; revisit after
   the squirrel_away porting pass makes the current state legible.
 - [ ] Land any port bugs surfaced during the above work (functional
@@ -422,12 +438,17 @@ Items in **bold** below were surfaced by the Phase 2.1 architecture review.
     too, not just intermediates — a warm "rebuild" of an
     unchanged source tree is literally "Retrieved
     libSnoreCore.*.so from cache" in ~150 ms.
-  - [ ] Add actual test running. Today the workflow only builds; it
-    doesn't launch Godot against the demo project to run the gtest
-    suite. Doing so cleanly needs a pre-built Godot binary (don't
-    rebuild from source in CI). The simplest path is downloading
-    a Godot 4 stable release via the godotengine.org URL into a
-    workspace `godot/bin/` and pointing the demo at it.
+  - [ ] **Re-add real test running to surf_scaf's ci.yml.** Blocked
+    on the Phase 3 "Demo cleanup" item above (the demo currently
+    fails to parse under `--headless`). Test-run design is already
+    worked out and verified at the CI level — see commit `336b696`
+    on surf_scaf/dev for the original implementation (downloads
+    Godot 4.4-stable, runs `--editor --quit` to warm imports +
+    class registration, then `--headless --quit` to invoke
+    `SnoreCore.run_tests()`, greps stdout for "ALL TESTS PASSED").
+    Reverted in `bba8887` because the demo project itself isn't
+    yet headless-clean. Just put it back once the demo cleanup
+    lands.
   - [x] **Opt actions/checkout into Node 24.** Done 2026-05-20.
     Each ci.yml's build job sets
     `env: FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true`, which moves
