@@ -371,15 +371,18 @@ Items in **bold** below were surfaced by the Phase 2.1 architecture review.
   (`builds.yml` + `tests.yml`, ~640 lines combined per repo with a
   multi-platform release matrix that nothing consumed) were replaced
   with a single `ci.yml` (~70-110 lines per repo). The new workflow:
-  triggers on `push` / `pull_request` to `dev` / `main` / `master`
-  plus `workflow_dispatch`; runs on `ubuntu-latest`; checks out the
-  full workspace-sibling layout (frameworks + godot-cpp@4.4 +
-  googletest) into the runner workspace root; builds via
-  `scons sc_ci=yes sc_dev=yes sc_tests=yes`. The `sc_ci=yes` flag is
-  important — `debug_utils.h`'s `DEBUG_BREAK` macro otherwise expands
-  to `__builtin_debugtrap` (Clang/MSVC-only) which GCC rejects. The
-  dead `.github/actions/sign/` Mac-signing action was deleted from
-  every repo. Followups inline below.
+  triggers on `schedule` (daily 04:00 UTC), `push` /
+  `pull_request` to the slim default branches (`main` / `master`),
+  plus `workflow_dispatch` for manual runs — explicitly NOT on push
+  to `dev`, to avoid burning private-repo CI minutes on every
+  commit during active porting work. Runs on `ubuntu-latest`;
+  checks out the full workspace-sibling layout (frameworks +
+  godot-cpp@4.4 + googletest) into the runner workspace root;
+  builds via `scons sc_ci=yes sc_dev=yes sc_tests=yes`. The
+  `sc_ci=yes` flag is important — `debug_utils.h`'s `DEBUG_BREAK`
+  macro otherwise expands to `__builtin_debugtrap` (Clang/MSVC-only)
+  which GCC rejects. The dead `.github/actions/sign/` Mac-signing
+  action was deleted from every repo. Followups inline below.
 
   Surfaced bugs in the framework (fixed during the rewrite, since the
   new Linux/GCC CI is stricter than the local Windows/MSVC build):

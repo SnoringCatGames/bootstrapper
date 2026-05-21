@@ -179,8 +179,14 @@ replaces that.
 Each of the six SnoringCat repos has a single `.github/workflows/ci.yml`
 (rewritten 2026-05-20; see ROADMAP housekeeping). The workflow:
 
-- Triggers on `push` / `pull_request` to `dev` / `main` / `master`,
-  plus `workflow_dispatch` for manual runs.
+- Triggers (cost-conscious set, mirrors hopnbop_private's pattern):
+  daily at 04:00 UTC via `schedule`; on `push` and `pull_request` to
+  the slim default branches (`main` / `master`); plus
+  `workflow_dispatch` for manual runs. **Pushes to `dev` do NOT
+  trigger CI**, since active porting work lives there and would
+  otherwise burn private-repo CI minutes on every commit. The
+  nightly cron catches breakage that landed on `dev`; manual
+  `gh workflow run ci.yml --ref dev` validates `dev` on demand.
 - Runs on `ubuntu-latest`. Single platform / arch / target for now
   (Linux x86_64 debug). The multi-platform matrix is deliberately
   not part of the rewrite — add back selectively when there's a real

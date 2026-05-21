@@ -1,8 +1,8 @@
 name: CI
 
-# Build verification on push / PR. Bootstrapper's own SConstruct does
-# not compile anything; it just refreshes the demo's addons/ symlinks
-# (Option B, ROADMAP housekeeping). So the CI build is:
+# Build verification. Bootstrapper's own SConstruct does not compile
+# anything; it just refreshes the demo's addons/ symlinks (Option B,
+# ROADMAP housekeeping). So the CI build is:
 #
 #   1. Set up the full workspace-sibling layout in the runner.
 #   2. Build the surf_scaf bundle (produces the framework .so).
@@ -14,10 +14,16 @@ name: CI
 # (sans actually launching the demo project in Godot).
 
 on:
+  # Cost-conscious trigger set (matches hopnbop_private's pattern):
+  # active dev work pushes to `dev` and does NOT trigger CI; the
+  # daily schedule + integration pushes to the slim default branches
+  # do.
   push:
-    branches: [dev, main, master]
+    branches: [main, master]
   pull_request:
-    branches: [dev, main, master]
+    branches: [main, master]
+  schedule:
+    - cron: '0 4 * * *'  # 04:00 UTC daily
   workflow_dispatch:
 
 concurrency:
