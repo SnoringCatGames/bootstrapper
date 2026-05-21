@@ -401,10 +401,19 @@ Items in **bold** below were surfaced by the Phase 2.1 architecture review.
 
   Followups (not blocking, future improvements):
 
-  - [ ] Add SCons cache via `actions/cache@v4` keyed on platform +
-    arch. Each CI run currently rebuilds godot-cpp from source
-    (~5-6 min of the ~9 min total). With cache, after the first
-    run most builds drop to ~2-3 min.
+  - [x] **Cache godot-cpp build artifacts (tier 1).** Done
+    2026-05-20. Each ci.yml caches `godot-cpp/bin`, `gen`,
+    `.sconsign.dblite`, and `src/**/*.os`. Cache key:
+    `godot-cpp-${runner.os}-gcc${gcc_version}-${godot_cpp_sha}-v1`,
+    with a restore-keys ladder so a SHA bump or branch shift still
+    reuses prior-OS-and-GCC cache (SCons does incremental rebuild
+    rather than full cold). Steady-state speedup expected ~7
+    min/run. The `-v1` suffix is the escape hatch — bump to `-v2`
+    to force-evict if cache poisoning is ever suspected.
+    Tier-2 (SCons object cache for framework code) deferred —
+    would need `env.CacheDir(...)` in `build_utils.py`, which is
+    a code change to the framework. Framework recompile is small
+    (~30-60s); tier-2 win is modest.
   - [ ] Add actual test running. Today the workflow only builds; it
     doesn't launch Godot against the demo project to run the gtest
     suite. Doing so cleanly needs a pre-built Godot binary (don't
