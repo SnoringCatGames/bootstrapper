@@ -127,15 +127,16 @@ and fairly thorough. surf_scaf is intentionally just a bundle shell.
 all updated to reflect 2.1/2.2 findings. Workspace CLAUDE.md unchanged —
 it already flags the WIP nature.
 
-**Decisions still open** (questions Phase 2 surfaced for the user):
+**Decisions resolved 2026-05-20:**
 
 1. Are the missing scaffolder systems (annotators, color_config,
    level_button/select, accordions, radial_menus, notifications, camera +
-   character framework, plugger) *intentionally dropped* or *deferred to
-   Phase 3*? CLAUDE.md should be updated either way.
-
-**Decisions resolved 2026-05-20:**
-
+   character framework, plugger) intentionally dropped or deferred?
+   **Intentionally dropped** (working assumption). The current scaffolder
+   surface is effectively final for the rewrite, modulo polish and bug
+   fixes. CLAUDE.md "Current port state" table updated to reflect this.
+   Phase 3 no longer carries scaffolder-porting work; it starts with
+   squirrel_away game logic.
 2. Is bootstrapper rebuilding surf_scaf intentional? **No** — switched
    to Option B (symlink). Bootstrapper's SConstruct does not compile
    anything; it just refreshes the demo's `addons/` tree, including a
@@ -240,12 +241,12 @@ Top items at the time of writing:
 1. **Phase 3 — finish the port.** Priority order per user direction
    2026-05-20: finish every *other* port and complete the cleanup /
    polishing of all known framework bits **before** porting any
-   additional surfacer logic. That means: missing scaffolder systems
-   (annotators, color_config, level_button/select, accordions,
-   radial_menus, notifications, camera + character framework,
-   plugger), squirrel_away game logic (currently empty), framework
-   setup improvements, and any open port-bug followups from Phase 2.2.
-   Surfacer's remaining GDScript → C++ port is the last step.
+   additional surfacer logic. The missing scaffolder systems were
+   resolved as intentionally dropped (see decisions above), so the
+   remaining Phase 3 work is: squirrel_away game logic (currently
+   empty), framework setup improvements, and any open port-bug
+   followups from Phase 2.2. Surfacer's remaining GDScript → C++ port
+   is the last step.
 2. Delete `C:\tmp\sc-backup\*.git` mirrors after ~2026-06-19 (one
    month after the Phase 1 surgery completion).
 3. ~~Eventually swap `std::unordered_map<StringName, ...>` for

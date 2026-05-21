@@ -274,16 +274,20 @@ all cleanup / polishing of the known framework bits **before** taking
 on any additional surfacer porting work. Surfacer is the biggest
 remaining lift; it lands last.
 
-- [ ] Port the missing scaffolder systems flagged by Phase 2.2:
-  annotators, color_config, level_button/select, accordions,
-  radial_menus, notifications, camera + character framework, plugger.
-  Some may be intentionally dropped — decide per-system.
+**Scope decision (2026-05-20):** the missing scaffolder systems
+(annotators, color_config, level_button/select, accordions,
+radial_menus, notifications, camera + character framework, plugger)
+are **intentionally dropped** as a working assumption. The current
+scaffolder surface is effectively final for the rewrite, modulo
+polish and bug fixes. Revisit if a squirrel_away port reveals a
+genuine missing dependency.
+
 - [ ] Build out squirrel_away game logic. Currently empty (no .gd or
   .cpp in `src/` or `addon/src/` on dev). Re-port from the godot3
-  branch, adapted to the new framework signatures.
+  branch, adapted to the new framework signatures. **This is the
+  first Phase 3 task.**
 - [ ] App/framework setup improvements. Specifics TBD; revisit after
-  the scaffolder/squirrel_away porting passes make the current state
-  legible.
+  the squirrel_away porting pass makes the current state legible.
 - [ ] Land any port bugs surfaced during the above work (functional
   diffs vs the godot3 branch).
 - [ ] Resolve architectural recommendations from Phase 2.1 (e.g.,
@@ -291,7 +295,10 @@ remaining lift; it lands last.
   above.
 - [ ] **Then, finally:** finish surfacer GDScript → C++ port. The
   surface-graph foundation is in place; edge/movement calculators
-  and pathfinding are not.
+  and pathfinding are not. Note: if a squirrel_away port surfaces a
+  genuine dependency on a dropped scaffolder system (e.g., the camera
+  framework), revisit the drop decision before continuing surfacer
+  work.
 
 ## Later (Phase 4 — new features)
 
