@@ -1,0 +1,107 @@
+name: CI
+
+# Build verification on push / PR. Bootstrapper's own SConstruct does
+# not compile anything; it just refreshes the demo's addons/ symlinks
+# (Option B, ROADMAP housekeeping). So the CI build is:
+#
+#   1. Set up the full workspace-sibling layout in the runner.
+#   2. Build the surf_scaf bundle (produces the framework .so).
+#   3. Run bootstrapper's scons to refresh symlinks.
+#   4. Verify the demo's surf_scaf/bin/ symlink resolves to a real
+#      artifact.
+#
+# This is the closest thing in the repo to a real end-to-end build
+# (sans actually launching the demo project in Godot).
+
+on:
+  push:
+    branches: [dev, main, master]
+  pull_request:
+    branches: [dev, main, master]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build (Linux, x86_64, debug)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout bootstrapper
+        uses: actions/checkout@v4
+        with:
+          path: bootstrapper
+
+      - name: Checkout snore_core (private)
+        uses: actions/checkout@v4
+        with:
+          repository: SnoringCatGames/snore_core
+          ref: dev
+          token: ${{ secrets.PRIVATECHECKOUTACCESSTOKEN }}
+          path: snore_core
+
+      - name: Checkout scaffolder
+        uses: actions/checkout@v4
+        with:
+          repository: SnoringCatGames/scaffolder
+          ref: dev
+          path: scaffolder
+
+      - name: Checkout surfacer
+        uses: actions/checkout@v4
+        with:
+          repository: SnoringCatGames/surfacer
+          ref: dev
+          path: surfacer
+
+      - name: Checkout surf_scaf (private)
+        uses: actions/checkout@v4
+        with:
+          repository: SnoringCatGames/surf_scaf
+          ref: dev
+          token: ${{ secrets.PRIVATECHECKOUTACCESSTOKEN }}
+          path: surf_scaf
+
+      - name: Checkout squirrel_away (private)
+        uses: actions/checkout@v4
+        with:
+          repository: SnoringCatGames/squirrel_away
+          ref: dev
+          token: ${{ secrets.PRIVATECHECKOUTACCESSTOKEN }}
+          path: squirrel_away
+
+      - name: Checkout godot-cpp (4.4)
+        uses: actions/checkout@v4
+        with:
+          repository: godotengine/godot-cpp
+          ref: '4.4'
+          path: godot-cpp
+
+      - name: Checkout googletest
+        uses: actions/checkout@v4
+        with:
+          repository: google/googletest
+          path: googletest
+
+      - name: Install SCons
+        run: |
+          python3 -m pip install --upgrade pip
+          pip3 install scons
+
+      - name: Build surf_scaf bundle (the actual artifact)
+        working-directory: surf_scaf
+        run: scons sc_ci=yes sc_dev=yes sc_tests=yes
+
+      - name: Refresh bootstrapper demo symlinks
+        working-directory: bootstrapper
+        run: scons
+
+      - name: Verify demo symlink resolves to a real .so
+        working-directory: bootstrapper
+        run: |
+          set -e
+          ls -lL demo/addons/surf_scaf/bin/
+          find -L demo/addons/surf_scaf/bin -name 'libSurfScaf.*.so' \
+              | grep -q . || (echo 'demo symlink does not resolve to a SurfScaf .so'; exit 1)
