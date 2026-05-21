@@ -203,8 +203,9 @@ What still needs the user's attention (one-time):
    Resolved by adding `snore_core/internal/std_hash.h` with a
    `std::hash<godot::StringName>` specialization that calls
    `StringName::hash()`, and including it from the six affected
-   headers in snore_core (4) and scaffolder (2). The idiomatic
-   `godot::HashMap`-based fix is tracked in ROADMAP housekeeping.
+   headers in snore_core (4) and scaffolder (2). Superseded
+   2026-05-20: the six sites were converted to `godot::HashMap` and
+   `std_hash.h` was deleted.
 3. **Rename the local dir** `bootstrapper2/` → `bootstrapper/` — DONE
    2026-05-20.
 
@@ -247,10 +248,11 @@ Top items at the time of writing:
    Surfacer's remaining GDScript → C++ port is the last step.
 2. Delete `C:\tmp\sc-backup\*.git` mirrors after ~2026-06-19 (one
    month after the Phase 1 surgery completion).
-3. Eventually swap `std::unordered_map<StringName, ...>` for
-   `godot::HashMap` and drop `snore_core/internal/std_hash.h`. Tracked
-   under ROADMAP housekeeping. Not urgent — the std_hash.h workaround
-   lets the build pass cleanly today.
+3. ~~Eventually swap `std::unordered_map<StringName, ...>` for
+   `godot::HashMap` and drop `snore_core/internal/std_hash.h`.~~
+   **Done 2026-05-20.** Six call sites converted to `godot::HashMap`
+   and the `std_hash.h` workaround deleted. End-to-end surf_scaf build
+   verified.
 
 ## Quick-start for the next session
 
