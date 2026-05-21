@@ -176,13 +176,36 @@ What still needs the user's attention (one-time):
    `.local-patches/` itself still sits at bootstrapper's repo root,
    untracked. Decide whether to keep it as a re-apply source or remove
    it now that godot-cpp carries the changes directly.
-2. **Verify a full build from bootstrapper.** Python imports
-   smoke-test passed during the refactor, but a full SCons compile was
-   not run. Run `scons sc_dev=yes sc_tests=yes` from
-   `~/Repositories/bootstrapper2/` (or `bootstrapper/` post-rename) to
-   confirm.
+2. **Build verify run on 2026-05-20.** `scons sc_dev=yes sc_tests=yes`
+   from `~/Repositories/bootstrapper2/` reached the snore_core compile
+   stage successfully — godot-cpp built clean against the sibling
+   layout, sources globbed correctly. The build then failed on a
+   pre-existing C++ bug: `std::unordered_map<StringName, ...>` in
+   `snore_core_main_module.h:93` needs a `std::hash<godot::StringName>`
+   specialization that godot-cpp 4.4 doesn't provide. See "Top items"
+   below.
 3. **Rename the local dir** `bootstrapper2/` → `bootstrapper/`. Still
    cosmetic and still pending.
+
+### Housekeeping completed during 2026-05-20
+
+In the same session, four items from the ROADMAP housekeeping list
+landed:
+
+- Deleted the three redundant `.gdextension` manifests
+  (snore_core, scaffolder, surfacer) plus their `.uid` companions.
+  Per-framework READMEs now document `surf_scaf` as the supported
+  loading path.
+- Fixed the broken `[icons]` block in `surf_scaf.gdextension` (and the
+  separate-but-identical copy in `squirrel_away/addon/bin/`). The stale
+  `GDExample = ".../surf_scaf2/.../SurfScafNode.svg"` placeholder is
+  gone; the block is now a comment noting that no icons exist yet.
+- Updated the gdext#615 comments in each framework's
+  `register_gdextension_types.cpp` to also cite
+  `godot-proposals#13997` (the engine proposal; gdext#615 is the
+  rust-bindings tracker).
+- Confirmed gtest gating fix from Phase 2.5 (`includes_dev AND
+  includes_tests`) is reflected in the ROADMAP checkbox.
 
 ## Known followups
 
@@ -192,16 +215,24 @@ is tracked in [ROADMAP.md](ROADMAP.md).
 
 Top items at the time of writing:
 
-1. **Verify full SCons build** from bootstrapper end-to-end (Phase 2.5
-   smoke-tested Python imports only).
+1. **Fix `std::unordered_map<StringName, ...>` compile error in
+   `snore_core_main_module.h`.** Surfaced when verifying the SCons build
+   end-to-end on 2026-05-20. godot-cpp does not define
+   `std::hash<godot::StringName>`, so the unordered_map declaration on
+   line 93 fails to instantiate under MSVC (errors C2056 / C2064 in
+   `xhash`). Options: provide a `std::hash<godot::StringName>`
+   specialization in a shared snore_core header, or switch the storage
+   to godot-cpp's idiomatic `HashMap<StringName, T>`. The same pattern
+   may need attention elsewhere if other code uses
+   `std::unordered_map<StringName, ...>`. Phase 2.5 path wiring is
+   verified — godot-cpp built clean against the sibling layout; only
+   snore_core's own sources hit this error.
 2. **Phase 3 — finish the port.** Scaffolder/surfacer port gaps from
    Phase 2.2 audit; squirrel_away game logic; framework setup
    improvements.
-3. Delete redundant `.gdextension` manifests (closes the
-   double-registration risk; see ROADMAP housekeeping).
-4. Rename local working directory `bootstrapper2\` → `bootstrapper\`
+3. Rename local working directory `bootstrapper2\` → `bootstrapper\`
    (cosmetic; close Godot + IDEs first).
-5. Delete `C:\tmp\sc-backup\*.git` mirrors after ~2026-05-26.
+4. Delete `C:\tmp\sc-backup\*.git` mirrors after ~2026-05-26.
 
 ## Quick-start for the next session
 

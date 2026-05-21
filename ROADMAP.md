@@ -291,26 +291,27 @@ Order is flexible and depends on Phase 2 findings.
 
 Items in **bold** below were surfaced by the Phase 2.1 architecture review.
 
-- [ ] **Delete the redundant `.gdextension` manifests on `dev`** —
-  `submodules/snore_core/addon/bin/snore_core.gdextension`,
-  `submodules/scaffolder/addon/bin/scaffolder.gdextension`,
-  `submodules/surfacer/addon/bin/surfacer.gdextension`. The demo only
-  loads `surf_scaf.gdextension`; the other three are double-registration
-  footguns if any future game accidentally loads two manifests. Document
-  in each lib's README that the bundle is the supported loading path.
-- [ ] **Gate googletest source inclusion** on
+- [x] **Delete the redundant `.gdextension` manifests** —
+  `snore_core/addon/bin/snore_core.gdextension`,
+  `scaffolder/addon/bin/scaffolder.gdextension`,
+  `surfacer/addon/bin/surfacer.gdextension`. The demo only loads
+  `surf_scaf.gdextension`; the other three were double-registration
+  footguns. Per-framework READMEs now document that `surf_scaf` is the
+  supported loading path. Done 2026-05-20.
+- [x] **Gate googletest source inclusion** on
   `env["includes_dev"] AND env["includes_tests"]` in
-  `submodules/snore_core/build_utils.py::set_up` (currently only
-  `includes_tests`). Today `sc_tests=yes sc_dev=no` would ship gtest
-  source into a release artifact.
-- [ ] **Fix the broken `[icons]` blocks** in the `.gdextension` manifests
-  (snore_core.gdextension, scaffolder.gdextension, surf_scaf.gdextension —
-  all point at placeholder `GDExample` and cross-addon `res://` paths
-  that don't make sense). Currently marked `FIXME` in source.
-- [ ] **Update the gdext#615 comments** in
-  `register_gdextension_types.cpp` files to also cite
-  `godot-proposals#13997` (the actual engine proposal for cross-extension
-  class inheritance; gdext#615 is the rust-bindings tracker).
+  `snore_core/build_utils.py::set_up`. Landed during Phase 2.5
+  workspace-sibling refactor (2026-05-20).
+- [x] **Fix the broken `[icons]` blocks** in the `.gdextension` manifests.
+  Three of the four manifests were deleted outright; the surviving
+  `surf_scaf.gdextension` (and its copy in `squirrel_away/addon/bin/`)
+  had its placeholder `GDExample` / `surf_scaf2` paths replaced with a
+  comment explaining that no icons are designed yet. Done 2026-05-20.
+- [x] **Update the gdext#615 comments** in
+  `register_gdextension_types.cpp` to also cite
+  `godot-proposals#13997` (the engine proposal for cross-extension class
+  inheritance; gdext#615 is the rust-bindings tracker). Updated in
+  surf_scaf, scaffolder, and surfacer. Done 2026-05-20.
 - [ ] **Decide bootstrapper's relationship to surf_scaf's artifact**.
   Today bootstrapper rebuilds the surf_scaf bundle into
   `demo/addons/surf_scaf/bin/` from scratch. Options: keep duplicating,
