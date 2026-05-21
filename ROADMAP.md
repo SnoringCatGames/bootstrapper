@@ -291,6 +291,18 @@ Order is flexible and depends on Phase 2 findings.
 
 Items in **bold** below were surfaced by the Phase 2.1 architecture review.
 
+- [ ] **Switch `std::unordered_map<StringName, ...>` to `godot::HashMap`**
+  across the framework. godot-cpp 4.4 uses `HashMap` / `AHashMap`
+  internally (see `godot_cpp/core/class_db.hpp`) and `HashMapHasherDefault`
+  already provides a hash for `StringName`, so this is the idiomatic
+  Godot-side container. The 2026-05-20 build-unblock added a
+  `std::hash<godot::StringName>` specialization in
+  `snore_core/internal/std_hash.h` as the smallest viable fix; this
+  followup converts the affected sites and removes that header. Known
+  sites: `snore_core_main_module.h`, `snore_core_root_module.h`,
+  `canvas_layer_service.h`, `time/stopwatch.h` in snore_core, plus
+  `scaffolder/screen_service.h` and `scaffolder/audio_service.h`.
+
 - [x] **Delete the redundant `.gdextension` manifests** —
   `snore_core/addon/bin/snore_core.gdextension`,
   `scaffolder/addon/bin/scaffolder.gdextension`,

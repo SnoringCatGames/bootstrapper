@@ -176,14 +176,18 @@ What still needs the user's attention (one-time):
    `.local-patches/` itself still sits at bootstrapper's repo root,
    untracked. Decide whether to keep it as a re-apply source or remove
    it now that godot-cpp carries the changes directly.
-2. **Build verify run on 2026-05-20.** `scons sc_dev=yes sc_tests=yes`
-   from `~/Repositories/bootstrapper2/` reached the snore_core compile
-   stage successfully — godot-cpp built clean against the sibling
-   layout, sources globbed correctly. The build then failed on a
-   pre-existing C++ bug: `std::unordered_map<StringName, ...>` in
-   `snore_core_main_module.h:93` needs a `std::hash<godot::StringName>`
-   specialization that godot-cpp 4.4 doesn't provide. See "Top items"
-   below.
+2. **Build verify on 2026-05-20 — PASS.** `scons sc_dev=yes sc_tests=yes`
+   from `~/Repositories/bootstrapper2/` now builds end-to-end and links
+   `demo/addons/surf_scaf/bin/windows/SurfScaf.windows.template_debug.x86_64.dll`.
+   First pass exposed a pre-existing compile error
+   (`std::unordered_map<StringName, ...>` couldn't instantiate because
+   godot-cpp 4.4 dropped its internal `std::unordered_map` use and so
+   no longer transitively provides a `std::hash<godot::StringName>`).
+   Resolved by adding `snore_core/internal/std_hash.h` with a
+   `std::hash<godot::StringName>` specialization that calls
+   `StringName::hash()`, and including it from the six affected
+   headers in snore_core (4) and scaffolder (2). The idiomatic
+   `godot::HashMap`-based fix is tracked in ROADMAP housekeeping.
 3. **Rename the local dir** `bootstrapper2/` → `bootstrapper/`. Still
    cosmetic and still pending.
 
@@ -215,24 +219,16 @@ is tracked in [ROADMAP.md](ROADMAP.md).
 
 Top items at the time of writing:
 
-1. **Fix `std::unordered_map<StringName, ...>` compile error in
-   `snore_core_main_module.h`.** Surfaced when verifying the SCons build
-   end-to-end on 2026-05-20. godot-cpp does not define
-   `std::hash<godot::StringName>`, so the unordered_map declaration on
-   line 93 fails to instantiate under MSVC (errors C2056 / C2064 in
-   `xhash`). Options: provide a `std::hash<godot::StringName>`
-   specialization in a shared snore_core header, or switch the storage
-   to godot-cpp's idiomatic `HashMap<StringName, T>`. The same pattern
-   may need attention elsewhere if other code uses
-   `std::unordered_map<StringName, ...>`. Phase 2.5 path wiring is
-   verified — godot-cpp built clean against the sibling layout; only
-   snore_core's own sources hit this error.
-2. **Phase 3 — finish the port.** Scaffolder/surfacer port gaps from
+1. **Phase 3 — finish the port.** Scaffolder/surfacer port gaps from
    Phase 2.2 audit; squirrel_away game logic; framework setup
    improvements.
-3. Rename local working directory `bootstrapper2\` → `bootstrapper\`
+2. Rename local working directory `bootstrapper2\` → `bootstrapper\`
    (cosmetic; close Godot + IDEs first).
-4. Delete `C:\tmp\sc-backup\*.git` mirrors after ~2026-05-26.
+3. Delete `C:\tmp\sc-backup\*.git` mirrors after ~2026-05-26.
+4. Eventually swap `std::unordered_map<StringName, ...>` for
+   `godot::HashMap` and drop `snore_core/internal/std_hash.h`. Tracked
+   under ROADMAP housekeeping. Not urgent — the std_hash.h workaround
+   lets the build pass cleanly today.
 
 ## Quick-start for the next session
 
