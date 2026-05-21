@@ -428,9 +428,12 @@ Items in **bold** below were surfaced by the Phase 2.1 architecture review.
     rebuild from source in CI). The simplest path is downloading
     a Godot 4 stable release via the godotengine.org URL into a
     workspace `godot/bin/` and pointing the demo at it.
-  - [ ] Opt the `actions/checkout@v4` step into Node 24 to silence
-    the deprecation warning, or wait until June 2026 when the
-    runner switches the default.
+  - [x] **Opt actions/checkout into Node 24.** Done 2026-05-20.
+    Each ci.yml's build job sets
+    `env: FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true`, which moves
+    every Node-20-based action onto Node 24 ahead of the June
+    2026 forced switch. Silences the deprecation annotation that
+    was firing on every run.
   - [ ] Move the per-repo `PRIVATECHECKOUTACCESSTOKEN` secrets to an
     organization-level secret so token rotation is a single
     operation (today a fresh PAT must be set on each of 4 private
