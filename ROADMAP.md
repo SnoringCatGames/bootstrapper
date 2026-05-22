@@ -455,11 +455,16 @@ Items in **bold** below were surfaced by the Phase 2.1 architecture review.
     every Node-20-based action onto Node 24 ahead of the June
     2026 forced switch. Silences the deprecation annotation that
     was firing on every run.
-  - [ ] Move the per-repo `PRIVATECHECKOUTACCESSTOKEN` secrets to an
-    organization-level secret so token rotation is a single
-    operation (today a fresh PAT must be set on each of 4 private
-    repos). Was discovered during the rewrite because surf_scaf's
-    per-repo PAT was stale and broke its CI's snore_core checkout.
+  - [x] **Move PRIVATECHECKOUTACCESSTOKEN to org-level.** Done
+    2026-05-21. Set as `PRIVATECHECKOUTACCESSTOKEN` on the
+    `SnoringCatGames` org with `--visibility selected` covering the
+    six framework repos. Per-repo copies deleted afterwards (org
+    resolves automatically when per-repo absent). Verified end-to-
+    end by triggering scaffolder CI with no per-repo secret —
+    Checkout snore_core succeeded against the org-level value.
+    Future rotations are now a single
+    `gh secret set PRIVATECHECKOUTACCESSTOKEN --org SnoringCatGames`
+    instead of touching N repos.
 - [x] **Decide what to do with `.local-patches/`** — kept as permanent
   local insurance (decision 2026-05-20). Background: the patch adds a
   `TypedArray<T>::debug()` helper to godot-cpp so MSVC can inspect

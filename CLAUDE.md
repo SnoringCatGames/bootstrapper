@@ -202,15 +202,16 @@ Each of the six SnoringCat repos has a single `.github/workflows/ci.yml`
   macro otherwise expands to `__builtin_debugtrap`, which is
   Clang/MSVC-only (the runner uses GCC).
 
-Private-repo cross-checkout uses the per-repo
+Private-repo cross-checkout uses the **org-level**
 `PRIVATECHECKOUTACCESSTOKEN` secret (a fine-grained PAT with
 read-only Contents access to the 4 private SnoringCat repos:
-snore_core, surf_scaf, squirrel_away, bootstrapper). The PAT is
-set independently on each repo that needs it — there's no
-org-level secret today. **Rotating the PAT is a per-repo
-operation**, so prefer creating one token with access to all
-4 repos and setting it on each. A followup in ROADMAP tracks
-migrating to an org-level secret.
+snore_core, surf_scaf, squirrel_away, bootstrapper). The secret
+is granted to all 6 SnoringCat repos via `--visibility selected`.
+Rotation is a single
+`gh secret set PRIVATECHECKOUTACCESSTOKEN --org SnoringCatGames --visibility selected --repos <list>`
+operation (needs the `admin:org` gh scope —
+`gh auth refresh -s admin:org` if missing). No per-repo copies
+exist today.
 
 The workflow does NOT run tests (the gtest suite lives in the demo
 project and needs a Godot binary). Build-only CI catches
