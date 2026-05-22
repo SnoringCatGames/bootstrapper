@@ -44,12 +44,11 @@ jobs:
         with:
           path: bootstrapper
 
-      - name: Checkout snore_core (private)
+      - name: Checkout snore_core
         uses: actions/checkout@v4
         with:
           repository: SnoringCatGames/snore_core
           ref: dev
-          token: ${{ secrets.PRIVATECHECKOUTACCESSTOKEN }}
           path: snore_core
 
       - name: Checkout scaffolder
@@ -66,20 +65,18 @@ jobs:
           ref: dev
           path: surfacer
 
-      - name: Checkout surf_scaf (private)
+      - name: Checkout surf_scaf
         uses: actions/checkout@v4
         with:
           repository: SnoringCatGames/surf_scaf
           ref: dev
-          token: ${{ secrets.PRIVATECHECKOUTACCESSTOKEN }}
           path: surf_scaf
 
-      - name: Checkout squirrel_away (private)
+      - name: Checkout squirrel_away
         uses: actions/checkout@v4
         with:
           repository: SnoringCatGames/squirrel_away
           ref: dev
-          token: ${{ secrets.PRIVATECHECKOUTACCESSTOKEN }}
           path: squirrel_away
 
       - name: Checkout godot-cpp (4.4)

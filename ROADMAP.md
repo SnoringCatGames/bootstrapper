@@ -491,16 +491,26 @@ Items in **bold** below were surfaced by the Phase 2.1 architecture review.
     every Node-20-based action onto Node 24 ahead of the June
     2026 forced switch. Silences the deprecation annotation that
     was firing on every run.
-  - [x] **Move PRIVATECHECKOUTACCESSTOKEN to org-level.** Done
-    2026-05-21. Set as `PRIVATECHECKOUTACCESSTOKEN` on the
-    `SnoringCatGames` org with `--visibility selected` covering the
-    six framework repos. Per-repo copies deleted afterwards (org
-    resolves automatically when per-repo absent). Verified end-to-
-    end by triggering scaffolder CI with no per-repo secret —
-    Checkout snore_core succeeded against the org-level value.
-    Future rotations are now a single
-    `gh secret set PRIVATECHECKOUTACCESSTOKEN --org SnoringCatGames`
-    instead of touching N repos.
+  - [x] **PRIVATECHECKOUTACCESSTOKEN setup, then made obsolete by
+    flipping repos public.** Two stages on 2026-05-21:
+    1. Migrated the PAT from per-repo to an org-level secret with
+       `--visibility selected` covering all 6 framework repos.
+       Verified scaffolder CI (public) resolved the org secret
+       correctly. Per-repo copies bulk-deleted afterwards.
+    2. Discovered later the same day that the org secret silently
+       resolves to empty inside **private** repos on the GitHub
+       Free plan ("Organization secrets cannot be used by private
+       repositories within your plan"). surf_scaf CI started
+       failing on the snore_core checkout with
+       "Input required and not supplied: token". Three options:
+       hybrid (org + per-repo on privates), revert (per-repo on
+       all), or just make the private repos public. Chose option
+       3 — flipped snore_core, surf_scaf, bootstrapper to public
+       via `gh repo edit --visibility public`. All 6 framework
+       repos are now public; the PAT is no longer used by any CI
+       workflow, the `token: ${{ secrets.* }}` lines are removed,
+       and the org secret can be deleted at leisure. No
+       rotation surface left for the PAT.
 - [x] **Decide what to do with `.local-patches/`** — kept as permanent
   local insurance (decision 2026-05-20). Background: the patch adds a
   `TypedArray<T>::debug()` helper to godot-cpp so MSVC can inspect

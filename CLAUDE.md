@@ -183,10 +183,11 @@ Each of the six SnoringCat repos has a single `.github/workflows/ci.yml`
   daily at 04:00 UTC via `schedule`; on `push` and `pull_request` to
   the slim default branches (`main` / `master`); plus
   `workflow_dispatch` for manual runs. **Pushes to `dev` do NOT
-  trigger CI**, since active porting work lives there and would
-  otherwise burn private-repo CI minutes on every commit. The
-  nightly cron catches breakage that landed on `dev`; manual
-  `gh workflow run ci.yml --ref dev` validates `dev` on demand.
+  trigger CI** — these repos are public so Actions minutes are
+  free, but per-push noise during active porting still isn't
+  worth the run-result churn. The nightly cron catches breakage
+  that landed on `dev`; manual `gh workflow run ci.yml --ref dev`
+  validates `dev` on demand.
 - Runs on `ubuntu-latest`. Single platform / arch / target for now
   (Linux x86_64 debug). The multi-platform matrix is deliberately
   not part of the rewrite — add back selectively when there's a real
@@ -202,21 +203,24 @@ Each of the six SnoringCat repos has a single `.github/workflows/ci.yml`
   macro otherwise expands to `__builtin_debugtrap`, which is
   Clang/MSVC-only (the runner uses GCC).
 
-Private-repo cross-checkout uses the **org-level**
-`PRIVATECHECKOUTACCESSTOKEN` secret (a fine-grained PAT with
-read-only Contents access to the 4 private SnoringCat repos:
-snore_core, surf_scaf, squirrel_away, bootstrapper). The secret
-is granted to all 6 SnoringCat repos via `--visibility selected`.
-Rotation is a single
-`gh secret set PRIVATECHECKOUTACCESSTOKEN --org SnoringCatGames --visibility selected --repos <list>`
-operation (needs the `admin:org` gh scope —
-`gh auth refresh -s admin:org` if missing). No per-repo copies
-exist today.
+All 6 SnoringCat framework repos are public, so cross-checkout
+uses the default `actions/checkout@v4` token (the per-workflow
+`GITHUB_TOKEN`); no PAT is required. (Brief history: a
+`PRIVATECHECKOUTACCESSTOKEN` PAT was used while snore_core /
+surf_scaf / bootstrapper were private. A 2026-05-21 org-secret
+migration ran into the GitHub Free plan limitation that org
+secrets don't resolve in private repos, after which the three
+private repos were flipped to public — eliminating the need for
+the PAT entirely.)
 
-The workflow does NOT run tests (the gtest suite lives in the demo
-project and needs a Godot binary). Build-only CI catches
-compilation regressions, which is what most matters during the
-rewrite. The "add real test running" followup is in ROADMAP.
+CI runs the gtest suite via the surf_scaf demo. Pattern:
+`--headless --editor --quit` warm pass (retried up to 3x because
+the extension's first-load init occasionally SEGVs cold), then
+`--headless --quit-after 60 --path ./demo`. The `--quit-after 60`
+is essential because main.gd defers `SnoreCore.run_tests()` to
+the next frame (so Tween fixtures can mutate the scene tree).
+We grep stdout for `ALL TESTS PASSED`; Godot's exit code is
+unreliable because non-fatal warnings flip it.
 
 ## Commit / push conventions
 
