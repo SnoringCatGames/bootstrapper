@@ -496,17 +496,19 @@ Items in **bold** below were surfaced by the Phase 2.1 architecture review.
     too, not just intermediates — a warm "rebuild" of an
     unchanged source tree is literally "Retrieved
     libSnoreCore.*.so from cache" in ~150 ms.
-  - [ ] **Re-add real test running to surf_scaf's ci.yml.** Blocked
-    on the Phase 3 "Demo cleanup" item above (the demo currently
-    fails to parse under `--headless`). Test-run design is already
-    worked out and verified at the CI level — see commit `336b696`
-    on surf_scaf/dev for the original implementation (downloads
-    Godot 4.4-stable, runs `--editor --quit` to warm imports +
-    class registration, then `--headless --quit` to invoke
-    `SnoreCore.run_tests()`, greps stdout for "ALL TESTS PASSED").
-    Reverted in `bba8887` because the demo project itself isn't
-    yet headless-clean. Just put it back once the demo cleanup
-    lands.
+  - [x] **Re-add real test running to surf_scaf's ci.yml.** Done
+    2026-05-21 after the Phase 3 "Demo cleanup" item unblocked it.
+    Final pattern: download + cache Godot 4.4.1-stable (matches
+    godot-cpp's `4.4` branch HEAD; 4.4-stable = 4.4.0 refuses to
+    load the extension with "Cannot load a GDExtension built for
+    Godot 4.4.1 using an older version of Godot (4.4.0)"); run
+    `--headless --editor --quit` (retried up to 3x because the
+    extension's first-load init occasionally SEGVs cold); then
+    `--headless --quit-after 60 --path ./demo` (the `--quit-after`
+    is essential because main.gd defers `SnoreCore.run_tests()`
+    via `call_deferred` so Tween fixtures can mutate the scene
+    tree); grep stdout for "ALL TESTS PASSED" (Godot's exit code
+    is unreliable). Steady-state: 76 tests, all green.
   - [x] **Opt actions/checkout into Node 24.** Done 2026-05-20.
     Each ci.yml's build job sets
     `env: FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true`, which moves
