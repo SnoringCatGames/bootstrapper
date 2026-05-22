@@ -282,23 +282,59 @@ scaffolder surface is effectively final for the rewrite, modulo
 polish and bug fixes. Revisit if a squirrel_away port reveals a
 genuine missing dependency.
 
-- [ ] **Demo cleanup so CI tests can run.** Surfaced 2026-05-21
-  while trying to add headless test runs in surf_scaf's CI. The
-  demo project's scaffolder autoload `addon/src/core/s.gd`
-  declares typed variables referencing already-dropped systems
-  (`LoggersDisplay`, `ScaffolderGameScreen`,
-  `ScaffolderSettingsOld`). Its parse fails at autoload time —
-  before GDExtension class registration finishes — and cascades
-  into every downstream script. Works locally because the editor's
-  interactive load sequence is more permissive than
-  `--headless --quit`. Needs: drop or stub the references to
-  removed types in `s.gd`; fix the surf_scaf demo's
-  `settings.tres` files to not reference removed scenes (HUD,
-  super_hud); confirm `godot --headless --quit --path ./demo`
-  exits cleanly and reaches `SnoreCore.run_tests()`. Once green,
-  re-add the test-run step to surf_scaf's ci.yml (see prior commit
-  history on dev — the step was reverted but the design is
-  worked out).
+- [x] **Demo cleanup so CI tests can run.** Done 2026-05-21.
+  Diagnosis applied hopnbop's web-parse-cascade playbook (read
+  log top-down for upstream cause, never strip type annotations
+  via `.get()`). Root cause was a chain of three independent
+  bugs, not the type references the roadmap predicted: (1) C++
+  GDScript parent classes (`ScaffolderScreen`, `ScaffolderLevel`)
+  declare `_ready` as `virtual override` without binding it via
+  `_bind_methods`, so the parser rejects `super()` / `super._ready()`
+  calls in subclass `_ready` overrides; (2) the demo's
+  `scaffolder_settings.tres` referenced three missing scenes
+  (`scaffolder_shell.tscn`, `hud.tscn`, `super_hud.tscn`) plus
+  stale property names (`adv_super_hud_scene`, `adv_shell_scene`);
+  (3) cold-boot GDExtension class registration races autoload
+  parsing — needs an editor-warm step in CI to populate
+  `.godot/extension_list.cfg` before the test pass. Once the
+  demo booted to `SnoreCore.run_tests()`, nine real test
+  failures surfaced. All nine fixed in this pass:
+  - `SnoreCoreUtils::dedup` cleared its hash map mid-routine
+    then queried the empty map, plus double-incremented the
+    loop index. Rewrote.
+  - `SnoreCoreUtils::get_datetime_string` / `get_time_string`
+    omitted the milliseconds suffix the tests expected.
+  - `TimeService::get_time_tracker_for_time_type` returned the
+    `nullptr` trackers when called before `set_up()`; now
+    lazy-instantiates them. (`set_up()` still adds them to the
+    scene tree at runtime; tests skip that path safely.)
+  - `GameSession::get_play_time` returned a negative value
+    when no `TimeService` singleton was active (i.e. in unit
+    tests). Clamped to ≥ 0.
+  - `InGameSettings::get_settings_properties` filtered on
+    `PROPERTY_USAGE_SCRIPT_VARIABLE`, which C++ `ADD_PROPERTY`
+    entries don't set. Switched to `PROPERTY_USAGE_EDITOR`
+    only.
+  - `TweenTest`'s fixture aliased `parent_node` to the scene
+    root and tried to add it as a child of itself — the four
+    Tween tests crashed in TearDown with SEH access violations.
+    Fixture now creates a fresh `memnew(Node)` parent.
+  - `main.gd` called `SnoreCore.run_tests()` synchronously
+    inside `_ready()`, which tripped the "Parent node is busy
+    setting up children" guard when Tween fixtures tried to
+    add helper nodes. Deferred to next frame via
+    `call_deferred`; CI now uses `--quit-after 60` instead of
+    `--quit` so the deferred call gets a frame to fire.
+  - Bonus build-system bug surfaced: `snore_core/build_utils.py`'s
+    `post_setup` did `shutil.rmtree(addon/bin/)` on every build,
+    deleting the committed `.gdextension` + per-platform
+    `.gdignore` files. Now clears only the active platform's
+    binaries, preserving the manifest and gdignores.
+  Final test count: 76 PASSED / 0 FAILED. CI test step
+  re-added to surf_scaf's `ci.yml` with `--editor --quit` warm
+  + `--headless --quit-after 60` test pattern, grepping stdout
+  for the "ALL TESTS PASSED" marker (Godot's exit code is
+  unreliable).
 - [ ] Build out squirrel_away game logic. Currently empty (no .gd or
   .cpp in `src/` or `addon/src/` on dev). Re-port from the godot3
   branch, adapted to the new framework signatures.
