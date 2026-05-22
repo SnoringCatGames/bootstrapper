@@ -340,11 +340,33 @@ genuine missing dependency.
   branch, adapted to the new framework signatures.
 - [ ] App/framework setup improvements. Specifics TBD; revisit after
   the squirrel_away porting pass makes the current state legible.
+  - [x] Documented the canonical game-project boilerplate
+    ("Consuming the framework" in CLAUDE.md). Future port work
+    has a clear starting reference. 2026-05-21.
+  - [ ] Consolidate the multi-`.tres` setup into a single manifest
+    resource (the `# FIXME: Implement manifests` at
+    `surf_scaf/demo/src/main.gd:5`). Still deferred — needs a
+    real consumer's needs to surface before designing the schema.
 - [ ] Land any port bugs surfaced during the above work (functional
   diffs vs the godot3 branch).
-- [ ] Resolve architectural recommendations from Phase 2.1 (e.g.,
-  registration idempotency guard if needed) inline with the work
-  above.
+  - [x] First batch landed 2026-05-21 alongside the demo
+    cleanup: dedup, get_datetime/time_string, time tracker
+    lazy init, game_session play_time guard, in_game_settings
+    filter, plus the SCons build-wipe build-system bug and 4
+    Tween-fixture crashes. Test suite is 76 PASSED / 0 FAILED.
+- [x] **Resolve architectural recommendations from Phase 2.1.** Done
+  2026-05-21. All three findings from the original review were
+  closed: (a) double-registration risk → standalone `.gdextension`
+  manifests deleted 2026-05-20; (b) googletest source gating →
+  fixed in Phase 2.5; (c) bootstrapper rebuilding surf_scaf →
+  switched to symlink in Phase 2.5. The remaining "registration
+  idempotency guard if needed" item is now also landed: each
+  module's `register_gdextension_types` carries an
+  `are_types_registered` intra-DLL flag plus a
+  `ClassDB::class_exists("RootClass")` cross-DLL check that
+  WARN_PRINTs and bails instead of failing per-class if another
+  loaded extension already registered the same classes. Hardens
+  against re-introducing finding (a).
 - [ ] **Then, finally:** finish surfacer GDScript → C++ port. The
   surface-graph foundation is in place; edge/movement calculators
   and pathfinding are not. Note: if a squirrel_away port surfaces a

@@ -117,7 +117,7 @@ docs — the default-branch view will fill in over time.
   Once the symlinks are in place, future surf_scaf rebuilds are
   visible through the symlink without re-running bootstrapper's scons.
 
-### Double-registration risk (mitigated 2026-05-20)
+### Double-registration risk (mitigated 2026-05-20 + hardened 2026-05-21)
 
 Originally the framework carried four `.gdextension` manifests in source
 — `snore_core.gdextension`, `scaffolder.gdextension`,
@@ -132,6 +132,23 @@ The three standalone manifests (snore_core / scaffolder / surfacer) were
 deleted on 2026-05-20 to close this hole; each framework's README now
 documents `surf_scaf` as the supported loading path. The only manifest
 shipped is `surf_scaf/addon/bin/surf_scaf.gdextension`.
+
+Each module's `register_gdextension_types` also carries two layered
+guards (added 2026-05-21):
+
+1. An `are_types_registered` static flag for the intra-DLL re-entry
+   case (e.g., bundled chained registration calling the same registrar
+   twice).
+2. A `ClassDB::class_exists("RootClass")` check for the cross-DLL
+   case (another loaded extension already registered the same classes).
+   If true, we log a `WARN_PRINT` naming the root class and bail out of
+   the whole registration block — much friendlier than the cryptic
+   per-class `ClassDB::register_class` failures we'd otherwise hit.
+
+Both guards are defensive: the supported configuration is one
+`surf_scaf.gdextension`, and the cross-DLL path shouldn't fire in
+practice. If a future contributor accidentally re-introduces a
+standalone manifest, the warning surfaces the mistake clearly.
 
 ### Test source wiring (fixed 2026-05-20)
 
@@ -173,6 +190,78 @@ upstreams + godot-cpp + godot + googletest as nested git submodules.
 This produced multi-GB redundant clones (5+ copies of godot-cpp/godot
 across the tree) and forced N× SHA bumping. The flat sibling layout
 replaces that.
+
+## Consuming the framework (game-project boilerplate)
+
+A new game project consumes the framework as a workspace sibling
+(no submodules) and loads `surf_scaf.gdextension` directly. The
+`surf_scaf/demo/` directory in this repo is the canonical reference.
+Minimum boilerplate:
+
+**`project.godot`** — declare two autoloads + the single extension:
+
+```ini
+[autoload]
+S="*res://addons/scaffolder/src/core/s.gd"       ; framework-side
+G="*res://src/<your_game>_globals.gd"            ; game-side
+
+[native_extensions]
+paths=["res://addons/surf_scaf/bin/surf_scaf.gdextension"]
+```
+
+**One `.tres` per module's settings.** Each derives from a C++
+`*Settings` class — `SnoreCoreMainSettings`, `ScaffolderSettings`,
+`SurfacerSettings`. Define one per game (in `demo/src/*.tres` for
+reference). Required because the framework's `set_up()` takes the
+full set and dispatches each one to its module by class name.
+
+**`main.gd` skeleton** (one Node `_ready` does the wiring):
+
+```gdscript
+class_name DemoMain
+extends Node
+
+@export var snore_core_settings: SnoreCoreMainSettings
+@export var scaffolder_settings: ScaffolderSettings
+@export var surfacer_settings: SurfacerSettings
+
+
+func _ready() -> void:
+    G.snore_core = SnoreCore.get_module("SnoreCore")
+    G.scaffolder = SnoreCore.get_module("Scaffolder")
+    G.surfacer = SnoreCore.get_module("Surfacer")
+    G.snore_core.connect(
+            "all_modules_set_up_finished",
+            _on_set_up_finished)
+    SnoreCore.set_up([
+        snore_core_settings,
+        scaffolder_settings,
+        surfacer_settings,
+    ])
+
+
+func _on_set_up_finished() -> void:
+    G.snore_core_settings = G.snore_core.get_settings()
+    G.scaffolder_settings = G.scaffolder.get_settings()
+    G.surfacer_settings = G.surfacer.get_settings()
+    # Framework is ready; do game-specific setup here.
+```
+
+**Notes on the contract.**
+
+- `SnoreCore.set_up([...])` is fire-and-go. The framework wires
+  modules in dependency order and emits
+  `all_modules_set_up_finished` when all submodules' `set_up()`
+  callbacks have completed. Game code should connect to that
+  signal rather than assuming completion right after the
+  `set_up()` call returns.
+- `SnoreCore.get_module("Name")` returns the live module
+  singleton; safe to cache in `G.<name>` as shown above.
+- The `S` autoload (scaffolder's `s.gd`) is currently a thin
+  shim. The "implement manifests" FIXME at `surf_scaf/demo/src/main.gd:5`
+  tracks consolidating the multi-`.tres` setup into a single
+  manifest resource — deferred until a real game (squirrel_away)
+  surfaces concrete needs.
 
 ## GitHub Actions
 
