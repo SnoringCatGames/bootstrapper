@@ -34,45 +34,45 @@ porting before the long pause. No new code; findings + coverage matrix.
 
 Read in this order and take notes inline:
 
-- [ ] `SConstruct` — umbrella build orchestration.
-- [ ] `submodules/snore_core/build_utils.py` — shared SCons helper (defines
+- [x] `SConstruct` — umbrella build orchestration.
+- [x] `submodules/snore_core/build_utils.py` — shared SCons helper (defines
   `pre_setup`, `post_setup`, `set_up`, `create_submodule_addons_symlinks`,
   the `sc_tests`/`sc_dev`/`sc_ci`/`sc_zip` flags, `is_setup_for_self`).
-- [ ] Each submodule's `SConstruct` + `build_utils.py` (snore_core,
+- [x] Each submodule's `SConstruct` + `build_utils.py` (snore_core,
   scaffolder, surfacer, surf_scaf).
-- [ ] Each submodule's `src/register_gdextension_types.cpp` (registration
+- [x] Each submodule's `src/register_gdextension_types.cpp` (registration
   chain; references godot-rust/gdext#615).
-- [ ] Each `addon/bin/<name>.gdextension` manifest.
-- [ ] `submodules/snore_core/src/snore_core/snore_core_submodule.h` +
+- [x] Each `addon/bin/<name>.gdextension` manifest.
+- [x] `submodules/snore_core/src/snore_core/snore_core_submodule.h` +
   `snore_core_root_module.h` + `snore_core_main_module.h` (the "submodule"
   abstraction inside each extension).
-- [ ] `build_utils.py::create_symlink_for_surf_scaf_extension_manifest`
+- [x] `build_utils.py::create_symlink_for_surf_scaf_extension_manifest`
   (demo-time wiring).
 
 What to flag:
 
-- [ ] Is `register_gdextension_types` idempotent? Bootstrapper → surf_scaf
+- [x] Is `register_gdextension_types` idempotent? Bootstrapper → surf_scaf
   (which already registers snore_core + scaffolder + surfacer) vs any
   direct-to-scaffolder path could double-register.
-- [ ] Symbol visibility: confirm `GDE_EXPORT` is only on the per-extension
+- [x] Symbol visibility: confirm `GDE_EXPORT` is only on the per-extension
   entry symbol, not inner-lib `register_gdextension_types` (they're
   statically linked into each `.so/.dll`, not exported across boundaries).
-- [ ] SCons globbing duplication: does `set_up(..., is_setup_for_self=False)`
+- [x] SCons globbing duplication: does `set_up(..., is_setup_for_self=False)`
   ever cause two consumers to glob the same upstream `src/**/*.cpp`? Single-
   binary-per-consumer sidesteps this today but it's fragile.
-- [ ] Test wiring: `sc_tests=yes` defines `SC_TESTS_ENABLED` and pulls in
+- [x] Test wiring: `sc_tests=yes` defines `SC_TESTS_ENABLED` and pulls in
   googletest. Verify tests link only into dev builds, not shipped libs.
 
 External research targets:
 
-- [ ] `godot-cpp` docs on `entry_symbol` and multi-extension projects.
-- [ ] godot-rust/gdext#615 — cross-extension symbol exports in 4.x current
+- [x] `godot-cpp` docs on `entry_symbol` and multi-extension projects.
+- [x] godot-rust/gdext#615 — cross-extension symbol exports in 4.x current
   status.
-- [ ] Search: "godot 4 multiple gdextension shared types",
+- [x] Search: "godot 4 multiple gdextension shared types",
   "godot-cpp register_class deduplication".
-- [ ] Diff against `godot-cpp-template` (already cloned at
+- [x] Diff against `godot-cpp-template` (already cloned at
   `C:\Users\lsl\Repositories\godot-cpp-template`).
-- [ ] SCons multi-target builds for shared dep trees (`VariantDir`,
+- [x] SCons multi-target builds for shared dep trees (`VariantDir`,
   `Repository`).
 
 Deliverable: architectural notes + concrete recommendations.
@@ -84,27 +84,27 @@ snore_core, squirrel_away.
 
 Strategy:
 
-- [ ] Side-by-side clone the freshly-created `godot3` branches to a
+- [x] Side-by-side clone the freshly-created `godot3` branches to a
   separate dir tree (e.g. `C:\tmp\godot3\<repo>`) for easy `diff`.
-- [ ] For `scaffolder`: enumerate every class file under old
+- [x] For `scaffolder`: enumerate every class file under old
   `addon/src/`/`src/` (GDScript), then locate the counterpart in new
   `submodules/scaffolder/src/scaffolder/*.{cpp,h}` (C++) or
   `submodules/scaffolder/addon/**/*.gd` (GDScript shim). Build coverage
   matrix: `class_name | godot3_path | godot4_cpp_path | godot4_gd_path |
   status`. Status ∈ {ported, partial, missing, GDScript-stayed}.
-- [ ] For each "partial"/"ported" row: `git diff godot3:<file>
+- [x] For each "partial"/"ported" row: `git diff godot3:<file>
   master:<counterpart>` for changed defaults, removed signals, renamed
   methods, missing edge cases.
-- [ ] For `snore_core`: same matrix. Highest porting-bug risk; most
+- [x] For `snore_core`: same matrix. Highest porting-bug risk; most
   thoroughly ported. Focus: `geometry.cpp`, `annotations_service.cpp`,
   `log_service.cpp`, `circular_buffer.cpp`, `canvas_layer_service.cpp`
   (each has `test_*.h` — tests are the spec).
-- [ ] For `squirrel_away`: stays GDScript. Question is "does the new
+- [x] For `squirrel_away`: stays GDScript. Question is "does the new
   GDScript still match the old gameplay semantics given that
   snore_core/scaffolder/surfacer signatures changed?" Read each
   `submodules/squirrel_away/addon/src/*.gd`, diff against old, verify
   each cross-call into now-C++ APIs.
-- [ ] `surfacer`: skim only; note obvious gaps without deep-diving.
+- [x] `surfacer`: skim only; note obvious gaps without deep-diving.
 
 Deliverable:
 
@@ -123,21 +123,21 @@ without needing to re-derive it.
 
 Tasks:
 
-- [ ] Take the 2.1 + 2.2 findings and update the
+- [x] Take the 2.1 + 2.2 findings and update the
   authoritative project doc — `bootstrapper/CLAUDE.md` — to reflect
   any architectural truths that surfaced (e.g., changes in the
   dependency graph, build-system patterns, gotchas).
-- [ ] Update HANDOVER.md if any of the "Known followups" or
+- [x] Update HANDOVER.md if any of the "Known followups" or
   "Decisions made during execution" sections turn out to be wrong
   or outdated.
-- [ ] Update the workspace-level guide (`~/Repositories/CLAUDE.md`,
+- [x] Update the workspace-level guide (`~/Repositories/CLAUDE.md`,
   symlink-tracked into claude-config) if the entry there needs more
   detail or any of the assertions need correction.
-- [ ] Decide whether any reusable behavior belongs as a custom
+- [x] Decide whether any reusable behavior belongs as a custom
   skill under `~/Repositories/claude-config/skills/<name>/` (e.g., a
   "bump-framework-submodule" helper analogous to
   `bump-platform-submodule` for hopnbop). Land it if so.
-- [ ] Once the workspace-sibling refactor (2.5) lands, all of the
+- [x] Once the workspace-sibling refactor (2.5) lands, all of the
   above need another pass — the architecture changes meaningfully
   enough to invalidate prior docs.
 
@@ -215,26 +215,26 @@ boundary.
 
 ### Tasks
 
-- [ ] Audit references to nested submodule paths across the
+- [x] Audit references to nested submodule paths across the
   ecosystem. Grep each framework for `submodules/snore_core`,
   `submodules/scaffolder`, `submodules/surfacer`, `submodules/godot-cpp`,
   `submodules/godot`, `submodules/googletest` in `SConstruct`,
   `build_utils.py`, `.gdextension` manifests, asset paths.
-- [ ] Update each framework's `SConstruct` / `build_utils.py` to look
+- [x] Update each framework's `SConstruct` / `build_utils.py` to look
   for `../<dep>/` instead of `submodules/<dep>/`.
-- [ ] Add build-time assertions: clear error messages naming each
+- [x] Add build-time assertions: clear error messages naming each
   expected sibling path and how to clone it.
-- [ ] Remove all `[submodule "..."]` entries from each framework's
+- [x] Remove all `[submodule "..."]` entries from each framework's
   `.gitmodules`. After this, each framework's `.gitmodules` is either
   empty or doesn't exist.
-- [ ] Add a `scripts/bootstrap-workspace.ps1` (probably owned by
+- [x] Add a `scripts/bootstrap-workspace.ps1` (probably owned by
   bootstrapper) that clones every required sibling next to the current
   dir if it's not already present. Idempotent. Invoked once per new
   developer machine.
-- [ ] Update each framework's README to document the workspace-sibling
+- [x] Update each framework's README to document the workspace-sibling
   layout (point at bootstrapper's bootstrap script).
-- [ ] Verify build still works end-to-end from inside bootstrapper.
-- [ ] Update bootstrapper's HANDOVER.md once the layout change ships.
+- [x] Verify build still works end-to-end from inside bootstrapper.
+- [x] Update bootstrapper's HANDOVER.md once the layout change ships.
 
 ### Notes
 
