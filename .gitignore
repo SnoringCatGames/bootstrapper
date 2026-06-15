@@ -73,3 +73,8 @@ build/
 ## Ignore demo/addons/ content that gets linked/copied during the build
 
 demo/addons/*
+
+## Local-only godot-cpp dev patches: the permanent re-apply source for
+## the TypedArray<T>::debug helper applied to ~/Repositories/godot-cpp.
+## Never pushed upstream. See HANDOVER.md + ROADMAP.md (decision 2026-05-20).
+.local-patches/
