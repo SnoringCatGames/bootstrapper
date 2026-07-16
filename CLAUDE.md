@@ -91,6 +91,58 @@ branch and the "minimal default" period to end. This is meaningful
 for any future task that touches workflows, automation, or
 docs — the default-branch view will fill in over time.
 
+## Versioning
+
+**These repos are deliberately unversioned right now.** None of
+the six declares a version anywhere — no `plugin.cfg` version, no
+`config/version`, no version constant. That is correct and
+intentional for a pre-release rewrite. Do not add one.
+
+**Do not "fix" the missing versions.** The rewrite has no
+consumers: `bootstrapper` builds the siblings from `../<dep>/`
+working trees, not from released artifacts. A version number
+would be decoration that immediately rots — which is exactly
+what happened to `rollback_netcode` and the platform SDK
+(see their CLAUDE.md files).
+
+### Pre-rewrite lineage (do not collide with it)
+
+`scaffolder` and `surfacer` were published to the Godot Asset
+Library in the Godot 3 era and **carry real tags**:
+
+| Repo | Tags on remote | Asset Library branch |
+|---|---|---|
+| `scaffolder` | `v0.4.0`, `v0.5.0`, `v0.6.0`, `v0.7.0` (+ a stray unprefixed `0.4.0`) | `asset-lib-v0.7.0` |
+| `surfacer` | `v0.4.0`, `v0.5.0`, `v0.6.0`, `v0.7.0` (+ a stray unprefixed `0.4.0`) | `asset-lib-v0.7.0` |
+| `bootstrapper`, `snore_core`, `surf_scaf`, `squirrel_away` | none | — |
+
+The stray unprefixed `0.4.0` tags duplicate `v0.4.0`. Leave them;
+retagging published history to tidy a naming slip is not worth it.
+
+**GOTCHA — local `git tag -l` lies here.** Every sibling except
+`bootstrapper` is cloned single-branch
+(`+refs/heads/dev:refs/remotes/origin/dev`), so tags are never
+fetched and `git tag -l` prints nothing even for `scaffolder` and
+`surfacer`. Always confirm with
+`git ls-remote --tags origin` before concluding a repo is
+untagged.
+
+### When the rewrite ships
+
+At first release, and not before:
+
+- `scaffolder` / `surfacer` — **continue the existing lineage**
+  (next tag after `v0.7.0`). Do not restart at `v0.1.0` or
+  `v1.0.0`: those repos have published Asset Library versions and
+  a lower number would be a downgrade to existing users.
+- `bootstrapper` / `snore_core` / `surf_scaf` / `squirrel_away` —
+  no lineage; start at `v0.1.0`.
+- Only then add a version field, and make exactly one place own
+  it per repo.
+
+Until that day: the git SHA is the version. Say "the SHA", not
+"the version".
+
 ## Build system
 
 - **SCons** is the build tool. Each framework has its own `SConstruct`
