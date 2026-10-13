@@ -371,17 +371,9 @@ unreliable because non-fatal warnings flip it.
   be visible to drive-by visitors** — README, HANDOVER, ROADMAP, doc
   files. Use `git cherry-pick <sha>` from dev to keep histories
   separate.
-- **Submodule bumps in bootstrapper** follow upstream pushes (per the
-  workspace-level Repositories CLAUDE.md). This will go away once
-  Phase 2.5 of ROADMAP ships.
 - **Force-push** to any branch needs explicit user confirmation. The
   default branch in particular is public-facing for scaffolder /
   surfacer / squirrel_away.
-- **`git submodule sync --recursive`** has been observed to silently
-  fail to propagate URL changes in this repo's specific layout (see
-  HANDOVER.md decision #2). When changing submodule URLs, also
-  manually run `git -C submodules/<x> remote set-url origin <new>`
-  on each affected nested clone.
 
 ## Project goals (north stars)
 
